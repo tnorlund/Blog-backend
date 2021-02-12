@@ -1,0 +1,5 @@
+https://files.pythonhosted.org/packages/31/a4/c10f07959fd58ffd066518e3f163f55d40bc033191184a8903e660d88c03/pandas-1.2.2-cp38-cp38-manylinux1_x86_64.whl
+https://files.pythonhosted.org/packages/c7/e6/dccac76b7e825915ffb906beeba5a953597b6cfe1fe686b5276e122cb07c/numpy-1.20.1-cp38-cp38-manylinux2010_x86_64.whl
+https://files.pythonhosted.org/packages/70/94/784178ca5dd892a98f113cdd923372024dc04b8d40abe77ca76b5fb90ca6/pytz-2021.1-py2.py3-none-any.whl
+https://files.pythonhosted.org/packages/c1/2f/69402836a43926868594d8c96d91092a9a3d61d524723a968e2277c60501/xlrd2-1.2.6-py2.py3-none-any.whl
+https://files.pythonhosted.org/packages/59/cf/26b564729aae2f7bcceeb696d9727075a6a010ed5484845b75f864249407/pyarrow-3.0.0-cp38-cp38-manylinux2014_x86_64.whl
