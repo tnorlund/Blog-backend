@@ -1,0 +1,6 @@
+{
+  "name": "analytics",
+  "jest": {
+    "verbose": true
+  }
+}
