@@ -1,5 +1,3 @@
-![blog](https://tnorlundgithub.s3-us-west-2.amazonaws.com/blog.png)
-
 # Blog-backend
 
 This repository contains the infrastructure as code for Tyler's blog. 
