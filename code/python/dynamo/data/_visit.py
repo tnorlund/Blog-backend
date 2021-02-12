@@ -126,5 +126,5 @@ class _Visit():
       return { 'visit': visit }
     except ClientError as e:
       if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
-        return { 'error': f'Visit not in table' }
+        return { 'error': 'Visit not in table' }
       return { 'error': 'Could not update visit in table' }
