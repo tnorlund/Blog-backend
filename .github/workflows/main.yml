@@ -29,7 +29,7 @@ jobs:
     - name: Install node dependencies
       run: |
         cd code/node/@tnorlund:analytics/
-        npm ci 
+        npm -D ci 
         cd ../../../
     - name: Test with pytest
       run: |
