@@ -5,8 +5,8 @@ This repository contains the infrastructure as code for Tyler's blog.
 ## How To Run
 1. Run the setup script
 ```bash
-% cd bash/
-% bash bash.sh
+% cd setup/
+% bash setup.sh
 ```
 2. Run the terraform
 ```bash
