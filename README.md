@@ -2,7 +2,7 @@
 
 # Blog-backend
 
-This repository contains the infrastructure as code for Tyler's blog. It uses Terraform to deploy the AWS services.
+This repository contains the infrastructure as code for Tyler's blog. 
 
 ## How To Run
 1. Run the setup script
@@ -17,6 +17,7 @@ This repository contains the infrastructure as code for Tyler's blog. It uses Te
 ```
 
 ## What It Is
+It uses Terraform to deploy the AWS services.
 
 ![terraform](https://tnorlundgithub.s3-us-west-2.amazonaws.com/terraform.png)
 

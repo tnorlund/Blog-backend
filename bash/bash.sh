@@ -2,7 +2,8 @@
 #
 # Sets up the requirements for the Python Lambda Layer
 
-if [ ! -d "../python" ]; then
+if ! test -f "../python.zip"; then
+  echo "Creating Lambda Layer"
   # Download all the required wheels
   while read p; do
     curl -O "$p" &> /dev/null;
@@ -27,4 +28,21 @@ if [ ! -d "../python" ]; then
     done
     rm -rf $i
   done
+
+  # Build the python library
+  cd ../code/python;
+  python3 setup.py bdist_wheel &> /dev/null;
+  cd dist/;
+  python3 -m wheel unpack dynamo-0.0.1-py3-none-any.whl &> /dev/null;
+  cp -r dynamo-0.0.1/dynamo ../../../python/lib/python3.8/site-packages;
+  cp -r dynamo-0.0.1/dynamo-0.0.1.dist-info ../../../python/lib/python3.8/site-packages;
+  cd ../../../;
+  zip -r python.zip ./python &> /dev/null;
+  # Clean up
+  rm -rf python;
+  rm -rf code/python/build;
+  rm -rf code/python/dist;
+  rm -rf code/python/dynamo.egg-info;
+else
+  echo "Lambda Layer already exists"
 fi
