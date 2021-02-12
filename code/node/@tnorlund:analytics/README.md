@@ -1,5 +1,7 @@
 # Node Layer
 
+![](https://github.com/tnorlund/Blog-backend/workflows/Unit%20Tests/badge.svg)
+
 A package for accessing the Blog DB using Node.
 
 ## Testing the Package
