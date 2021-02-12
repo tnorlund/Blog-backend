@@ -3,6 +3,7 @@
 
 # Python stuff
 *__pycache__/**
+code/python/dynamo.egg-info/
 
 # Local .terraform directories
 **/.terraform/*
