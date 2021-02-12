@@ -6,7 +6,7 @@
 code/python/dynamo.egg-info/
 
 # Node stuff
-code/node/@tnorlund:analytics/node_modules/**
+code/node/@tnorlund:analytics/node_modules
 
 # Local .terraform directories
 **/.terraform/*
