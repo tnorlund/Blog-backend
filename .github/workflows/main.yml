@@ -33,7 +33,9 @@ jobs:
         cd ../../../
     - name: Test with pytest
       run: |
-        pytest --pylint --pylint-rcfile=code/python/.pylintrc code/python/
+        cd code/python/
+        pytest . 
+        cd ../../
     - name: Setup DynamoDB Local
       uses: rrainn/dynamodb-action@v2.0.0
       with:
