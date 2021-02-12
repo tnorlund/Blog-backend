@@ -11,19 +11,35 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
-    - name: Install dependencies
+    - name: Setup Node
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12
+    - name: Install python dependencies
       run: |
         python -m pip install --upgrade pip
         python -m pip install -e "code/python/.[testing]"
+    - name: Install node dependencies
+      run: |
+        cd code/node/@tnorlund:analytics/
+        npm ci 
+        cd ../../../
     - name: Test with pytest
       run: |
         pytest --pylint --pylint-rcfile=code/python/.pylintrc code/python/
+    - name: Setup DynamoDB Local
+      uses: rrainn/dynamodb-action@v2.0.0
+      with:
+        port: 8000
+        cors: '*'
+    - name: Test with jest
+      run: |
+        cd code/node/@tnorlund:analytics/
+        npm test

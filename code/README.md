@@ -1,3 +1,3 @@
 # Lambda Code
 
-Here is the code uploaded to the Lambda Functions and Layers.
+Here is the code used in the Lambda Functions and Layers.
