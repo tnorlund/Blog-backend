@@ -1,4 +1,12 @@
+# Setup
+
 This script sets up the python library used in the lambda layer.
+
+# How to Run
+In this directory, run the bash script.
+```bash
+% bash setup.sh
+```
 
 # What It Does
 1. Downloads the python packages from PYPI
