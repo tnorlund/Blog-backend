@@ -6,34 +6,41 @@ provider "aws" {
 
 module "layer" {
   source = "./LambdaLayer"
-  type = "nodejs"
-  path = "../node/layers/"
-}
-
-module "analytics" {
-  source = "./analytics"
-  kinesis_path = "${path.cwd}/../node/lambda/KinesisProcessor"
-  kinesis_file_name = "process"
-  dynamo_path = "${path.cwd}/../node/lambda/DynamoDBStream"
-  dynamo_file_name = "DynamoDBStream"
-  table_name = "Blog"
+  type = "python"
+  path = ".."
   developer = "Tyler Norlund"
-  layer_arn = module.layer.arn
-  ipify_key = var.ipify_key
 }
 
-module "identity" {
-  source = "./Identity"
-  developer = "Tyler Norlund"
-  user_pool_name = "blog_user_pool"
-  identity_pool_name = "blog_identity_pool"
-  firehose_arn = module.analytics.firehose_arn
-  api_name = "blog-api"
-}
+# module "layer" {
+#   source = "./LambdaLayer"
+#   type = "nodejs"
+#   path = "../node/layers/"
+# }
 
-output "identity_pool_id" {
-  value = module.identity.identity_pool_id
-}
+# module "analytics" {
+#   source = "./analytics"
+#   kinesis_path = "${path.cwd}/../node/lambda/KinesisProcessor"
+#   kinesis_file_name = "process"
+#   dynamo_path = "${path.cwd}/../node/lambda/DynamoDBStream"
+#   dynamo_file_name = "DynamoDBStream"
+#   table_name = "Blog"
+#   developer = "Tyler Norlund"
+#   layer_arn = module.layer.arn
+#   ipify_key = var.ipify_key
+# }
+
+# module "identity" {
+#   source = "./Identity"
+#   developer = "Tyler Norlund"
+#   user_pool_name = "blog_user_pool"
+#   identity_pool_name = "blog_identity_pool"
+#   firehose_arn = module.analytics.firehose_arn
+#   api_name = "blog-api"
+# }
+
+# output "identity_pool_id" {
+#   value = module.identity.identity_pool_id
+# }
 
 variable "ipify_key" {
   type = string

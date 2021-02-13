@@ -2,8 +2,10 @@
 #
 # Sets up the requirements for the Python Lambda Layer
 
-if ! test -f "../python.zip"; then
-  echo "Creating Lambda Layer"
+if ( ! test -f "../python.zip" ) || ( ! test -f "../nodejs.zip" ); then
+  echo "Creating NodeJS Lambda Layer"
+  zip -r ../nodejs.zip ../code/nodejs &> /dev/null;
+  echo "Creating Python Lambda Layer"
   # Download all the required wheels
   while read p; do
     curl -O "$p" &> /dev/null;
@@ -44,5 +46,5 @@ if ! test -f "../python.zip"; then
   rm -rf code/python/dist;
   rm -rf code/python/dynamo.egg-info;
 else
-  echo "Lambda Layer already exists"
+  echo "Lambda Layers already exist"
 fi

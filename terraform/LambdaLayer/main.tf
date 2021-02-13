@@ -1,14 +1,30 @@
 # Adds a NodeJS or Python Lambda Layer
 
-data "archive_file" "layer_zip_lambda_common_layer" {
-  type = "zip"
-  source_dir = var.type == "nodejs" ? "${path.cwd}/${var.path}/nodejs" : "${path.cwd}/${var.path}/python"
-  output_path = var.type == "nodejs" ? "${path.cwd}/${var.path}/nodejs.zip" : "${path.cwd}/${var.path}/python.zip"
+# Create an S3 Bucket to store the code data
+resource "aws_s3_bucket" "bucket" {
+  bucket = "blog-code-${var.stage}"
+  acl    = "private"
+  tags = {
+    Project   = "Blog"
+    Stage     = var.stage
+    Developer = var.developer
+  }
 }
 
+# Upload the compressed code to the S3 bucket
+resource "aws_s3_bucket_object" "object" {
+  bucket = aws_s3_bucket.bucket.bucket
+  key    = var.type == "nodejs" ? "nodejs.zip" : "python.zip"
+  source = var.type == "nodejs" ? "${var.path}/nodejs.zip" : "${var.path}/python.zip"
+}
+
+# Use the uploaded code as the Lambda Layer's code
 resource "aws_lambda_layer_version" "layer" {
   layer_name = var.type == "nodejs" ? "analytics_js" : "analytics_python"
-  filename = "${path.cwd}/${var.path}nodejs.zip"
+  s3_bucket = aws_s3_bucket.bucket.bucket
+  s3_key = aws_s3_bucket_object.object.key
+
   description = var.type == "nodejs" ? "Node Framework used to access DynamoDB" : "Python Framework used to access DynamoDB"
-  compatible_runtimes = var.type == "nodejs" ? ["nodejs12.x"] : ["python3.7"]
+  compatible_runtimes = var.type == "nodejs" ? ["nodejs12.x"] : ["python3.8"]
 }
+
