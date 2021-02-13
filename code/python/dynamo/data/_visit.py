@@ -128,3 +128,39 @@ class _Visit():
       if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
         return { 'error': 'Visit not in table' }
       return { 'error': 'Could not update visit in table' }
+
+  def updateVisits( self, visits ):
+    '''Updates visitor's pages with new attributes.
+
+    Parameters
+    ----------
+    visits : list[ Visits ]
+      The visits to updates the scroll events, previous and next pages, and the
+      start times.
+    '''
+    if not isinstance( visits, list ):
+      raise ValueError( 'Must pass a list' )
+    if any( not isinstance( visit, Visit ) for visit in visits ):
+      raise ValueError( 'Must pass Visit objects' )
+    try:
+      if len( visits ) > 25:
+        for sub_visits in chunkList( visits, 25 ):
+          self.client.batch_write_item(
+            RequestItems = {
+              self.tableName: [
+                { 'PutRequest': { 'Item': visit.toItem() } }
+                for visit in sub_visits
+              ] },
+          )
+      else:
+        self.client.batch_write_item(
+          RequestItems = {
+            self.tableName: [
+              { 'PutRequest': { 'Item': visit.toItem() } }
+              for visit in visits
+            ] },
+        )
+      return { 'visits': visits }
+    except ClientError as e:
+      print( f'ERROR addVisits: { e }')
+      return { 'error': 'Could not add new page visits to table' }
