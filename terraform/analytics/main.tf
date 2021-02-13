@@ -136,6 +136,7 @@ resource "aws_lambda_function" "dynamo_db_stream" {
   handler           = "${var.dynamo_file_name}.handler"
   source_code_hash  = filebase64sha256("${var.dynamo_path}/${var.dynamo_file_name}.zip")
   runtime           = "nodejs12.x"
+  layers            = [ var.node_layer_arn ]
   environment {
     variables = {
       IPIFY_KEY = var.ipify_key
@@ -166,6 +167,96 @@ resource "aws_s3_bucket" "bucket" {
     Stage     = var.stage
     Developer = var.developer
   }
+}
+
+# Create a Lambda function to process the S3 bucket put objects
+data "archive_file" "s3" {
+  type = "zip"
+  source_file = "${var.s3_path}/${var.s3_file_name}.py"
+  output_path = "${var.s3_path}/${var.s3_file_name}.zip"
+}
+data "aws_iam_policy_document" "s3" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "dynamodb:PutItem",
+      "dynamodb:DeleteItem",
+      "dynamodb:Scan",
+      "dynamodb:Query",
+      "s3:ListBucket",
+      "s3:PutObject",
+      "dynamodb:UpdateItem",
+      "logs:CreateLogGroup",
+      "logs:PutLogEvents",
+      "logs:CreateLogStream"
+    ]
+    resources = [ 
+      aws_dynamodb_table.table.arn,
+      "arn:aws:logs:*" 
+    ]
+    sid = "lambdaS3Processor"
+  }
+}
+resource "aws_iam_role" "s3" {
+   name = "s3_process_role"
+
+   assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Effect": "Allow"
+    }
+  ]
+}
+EOF
+}
+resource "aws_iam_role_policy" "s3" {
+  policy = data.aws_iam_policy_document.s3.json
+  role   = aws_iam_role.s3.id
+}
+resource "aws_lambda_function" "s3" {
+  filename          = "${var.s3_path}/${var.s3_file_name}.zip"
+  function_name     = "s3-lambda-processor-${var.stage}"
+  role              = aws_iam_role.s3.arn
+  handler           = "${var.s3_file_name}.handler"
+  source_code_hash  = filebase64sha256(
+    "${var.s3_path}/${var.s3_file_name}.zip"
+  )
+  runtime           = "python3.8"
+  layers            = [ var.python_layer_arn ]
+  memory_size       = 256
+  timeout           = 60
+  environment {
+    variables = {
+      IPIFY_KEY = var.ipify_key
+      TABLE_NAME = "${var.table_name}_${var.stage}"
+    }
+  }
+  tags              = {
+    Project   = "Blog"
+    Stage     = var.stage
+    Developer = var.developer
+  }
+}
+resource "aws_lambda_permission" "s3" {
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.s3.function_name
+  principal     = "s3.amazonaws.com"
+  source_arn    = aws_s3_bucket.bucket.arn
+}
+resource "aws_s3_bucket_notification" "bucket_terraform_notification" {
+   bucket = aws_s3_bucket.bucket.id
+   lambda_function {
+       lambda_function_arn = "${aws_lambda_function.s3.arn}"
+       events = ["s3:ObjectCreated:Put"]
+   }
+
+   depends_on = [ aws_lambda_permission.s3 ]
 }
 
 # Create a Lambda function to process the kinesis stream
@@ -225,7 +316,7 @@ resource "aws_lambda_function" "kinesis_processor" {
     "${var.kinesis_path}/${var.kinesis_file_name}.zip"
   )
   runtime           = "nodejs12.x"
-  layers            = [ var.layer_arn ]
+  layers            = [ var.node_layer_arn ]
   memory_size       = 256
   timeout           = 60
   environment {

@@ -25,23 +25,20 @@ module "node_layer" {
   developer = "Tyler Norlund"
 }
 
-# module "layer" {
-#   source = "./LambdaLayer"
-#   type = "nodejs"
-#   path = "../node/layers/"
-# }
-
-# module "analytics" {
-#   source = "./analytics"
-#   kinesis_path = "${path.cwd}/../node/lambda/KinesisProcessor"
-#   kinesis_file_name = "process"
-#   dynamo_path = "${path.cwd}/../node/lambda/DynamoDBStream"
-#   dynamo_file_name = "DynamoDBStream"
-#   table_name = "Blog"
-#   developer = "Tyler Norlund"
-#   layer_arn = module.layer.arn
-#   ipify_key = var.ipify_key
-# }
+module "analytics" {
+  source = "./analytics"
+  kinesis_path = "../code/lambda/"
+  kinesis_file_name = "kinesis_processor"
+  dynamo_path = "../code/lambda/"
+  dynamo_file_name = "dynamo_processor"
+  s3_path = "../code/lambda"
+  s3_file_name = "s3_processor"
+  table_name = "Blog"
+  developer = "Tyler Norlund"
+  node_layer_arn = module.node_layer.arn
+  python_layer_arn = module.python_layer.arn
+  ipify_key = var.ipify_key
+}
 
 # module "identity" {
 #   source = "./Identity"

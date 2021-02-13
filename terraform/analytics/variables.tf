@@ -20,9 +20,14 @@ variable "kinesis_path" {
   description = "The path to the file used in the Lambda Function"
 }
 
-variable "layer_arn" {
+variable "node_layer_arn" {
  type = string
  description = "The Lambda Layer's ARN" 
+}
+
+variable "python_layer_arn" {
+  type = string
+  description = "The Python Lambda Layer's ARN"
 }
 
 # The name of the DynamoDB table.
@@ -75,6 +80,16 @@ variable "dynamo_file_name" {
 variable "dynamo_path" {
   type = string
   description = "The path to the file used in the Lambda Function"
+}
+
+variable "s3_file_name" {
+  type = string
+  description = "The name of the file used in the S3 processor Lambda Function"
+}
+
+variable "s3_path" {
+  type = string
+  description = "The path to the file used in the S3 processor Lambda Function"
 }
 
 variable "ipify_key" {

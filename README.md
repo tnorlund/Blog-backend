@@ -8,10 +8,11 @@ This repository contains the infrastructure as code for Tyler's blog.
 % cd setup/
 % bash setup.sh
 ```
-2. Run the terraform
+2. Get your [Ipify](https://www.ipify.org) API key.
+3. Run the terraform
 ```bash
 % cd terraform
-% terraform apply
+% terraform apply -var="ipify_key=<API_KEY>"
 ```
 
 ## What It Is
