@@ -8,7 +8,7 @@ from dynamo.data import S3Client, DynamoClient
 from dynamo.processing import processDF
 from dynamo.entities import Visitor, Session, Visit
 
-def lambda_handler(event, context):
+def s3_processor(event, context):
   new = 0
   updated = 0
   additional = 0
@@ -64,8 +64,8 @@ def lambda_handler(event, context):
           last_sessions_visits[-1].slug, # slug
           last_sessions_visits[-1].sessionStart, # sessionStart 
           {
-            **last_sessions_visits[-1].scroll_events,
-            **record['visits'][0].scroll_events
+            **last_sessions_visits[-1].scrollEvents,
+            **record['visits'][0].scrollEvents
           }, # scrollEvents
           (
             # The total time on the updated page is the last scroll

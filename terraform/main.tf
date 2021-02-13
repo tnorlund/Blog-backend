@@ -1,7 +1,18 @@
+variable "ipify_key" {
+  type = string
+  description = "The ipify key used to make REST queries"
+}
+
+variable "aws_region" {
+  type = string
+  description = "The AWS region"
+  default = "us-west-2"
+}
+
 provider "aws" {
   shared_credentials_file = "~/.aws/credentials"
   profile                 = "development"
-  region                  = "us-west-2"
+  region                  = var.aws_region
 }
 
 module "layer_bucket" {
@@ -40,22 +51,37 @@ module "analytics" {
   ipify_key = var.ipify_key
 }
 
-# module "identity" {
-#   source = "./Identity"
-#   developer = "Tyler Norlund"
-#   user_pool_name = "blog_user_pool"
-#   identity_pool_name = "blog_identity_pool"
-#   firehose_arn = module.analytics.firehose_arn
-#   api_name = "blog-api"
-# }
+module "identity" {
+  source = "./Identity"
+  developer = "Tyler Norlund"
+  user_pool_name = "blog_user_pool"
+  identity_pool_name = "blog_identity_pool"
+  firehose_arn = module.analytics.firehose_arn
+  api_name = "blog-api"
+}
 
-# output "identity_pool_id" {
-#   value = module.identity.identity_pool_id
-# }
+output "identity_pool_id" {
+  value = module.identity.identity_pool_id
+}
 
-variable "ipify_key" {
-  type = string
-  description = "The ipify key used to make REST queries"
+output "user_pool_id" {
+  value = module.identity.user_pool_id
+}
+
+output "user_pool_client_id" {
+  value = module.identity.user_pool_client_id
+}
+
+output "dynamo_table_name" {
+  value = module.analytics.dynamo_table_name
+}
+
+output "firehose_stream_name" {
+  value = module.analytics.firehose_stream_name
+}
+
+output "aws_region" {
+  value = var.aws_region
 }
 
 # module "cognito" {
@@ -65,7 +91,6 @@ variable "ipify_key" {
 #   firehose_arn = module.analytics.firehose_arn
 #   depends_on = [ module.blog-api, module.analytics ]
 # }
-
 
 # module "blog-api" {
 #   source = "./blog_api"

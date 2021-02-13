@@ -2,7 +2,7 @@
 'use strict'
 const {
   addLocationFromIP
-} = require( `/opt/@tnorlund:analytics` )
+} = require( `/opt/nodejs/index` )
 console.log( `Loading function` )
 
 /**

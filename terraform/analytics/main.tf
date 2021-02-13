@@ -183,8 +183,10 @@ data "aws_iam_policy_document" "s3" {
       "dynamodb:DeleteItem",
       "dynamodb:Scan",
       "dynamodb:Query",
+      "dynamodb:BatchWriteItem",
       "s3:ListBucket",
       "s3:PutObject",
+      "s3:GetObject",
       "dynamodb:UpdateItem",
       "logs:CreateLogGroup",
       "logs:PutLogEvents",
@@ -192,6 +194,7 @@ data "aws_iam_policy_document" "s3" {
     ]
     resources = [ 
       aws_dynamodb_table.table.arn,
+      "arn:aws:s3:::*/*",
       "arn:aws:logs:*" 
     ]
     sid = "lambdaS3Processor"
@@ -223,7 +226,7 @@ resource "aws_lambda_function" "s3" {
   filename          = "${var.s3_path}/${var.s3_file_name}.zip"
   function_name     = "s3-lambda-processor-${var.stage}"
   role              = aws_iam_role.s3.arn
-  handler           = "${var.s3_file_name}.handler"
+  handler           = "${var.s3_file_name}.${var.s3_file_name}"
   source_code_hash  = filebase64sha256(
     "${var.s3_path}/${var.s3_file_name}.zip"
   )
@@ -252,7 +255,7 @@ resource "aws_lambda_permission" "s3" {
 resource "aws_s3_bucket_notification" "bucket_terraform_notification" {
    bucket = aws_s3_bucket.bucket.id
    lambda_function {
-       lambda_function_arn = "${aws_lambda_function.s3.arn}"
+       lambda_function_arn = aws_lambda_function.s3.arn
        events = ["s3:ObjectCreated:Put"]
    }
 

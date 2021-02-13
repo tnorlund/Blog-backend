@@ -4,7 +4,9 @@
 
 if ( ! test -f "../python.zip" ) || ( ! test -f "../nodejs.zip" ); then
   echo "Creating NodeJS Lambda Layer"
-  zip -r ../nodejs.zip ../code/nodejs &> /dev/null;
+  cd ../code
+  zip -r ../nodejs.zip nodejs &> /dev/null;
+  cd ../setup 
   echo "Creating Python Lambda Layer"
   # Download all the required wheels
   while read p; do

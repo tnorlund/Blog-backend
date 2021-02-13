@@ -1,4 +1,4 @@
-const { Blog, getBlog } = require( `/opt/@tnorlund:analytics` )
+const { Blog, getBlog } = require( `/opt/nodejs/index` )
 
 let response 
 
