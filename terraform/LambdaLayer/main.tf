@@ -1,9 +1,10 @@
 # Adds a NodeJS or Python Lambda Layer
 
-# Create an S3 Bucket to store the code data
-resource "aws_s3_bucket" "bucket" {
-  bucket = "blog-code-${var.stage}"
-  acl    = "private"
+# Upload the compressed code to the S3 bucket
+resource "aws_s3_bucket_object" "object" {
+  bucket = var.bucket_name
+  key    = var.type == "nodejs" ? "nodejs.zip" : "python.zip"
+  source = var.type == "nodejs" ? "${var.path}/nodejs.zip" : "${var.path}/python.zip"
   tags = {
     Project   = "Blog"
     Stage     = var.stage
@@ -11,17 +12,10 @@ resource "aws_s3_bucket" "bucket" {
   }
 }
 
-# Upload the compressed code to the S3 bucket
-resource "aws_s3_bucket_object" "object" {
-  bucket = aws_s3_bucket.bucket.bucket
-  key    = var.type == "nodejs" ? "nodejs.zip" : "python.zip"
-  source = var.type == "nodejs" ? "${var.path}/nodejs.zip" : "${var.path}/python.zip"
-}
-
 # Use the uploaded code as the Lambda Layer's code
 resource "aws_lambda_layer_version" "layer" {
   layer_name = var.type == "nodejs" ? "analytics_js" : "analytics_python"
-  s3_bucket = aws_s3_bucket.bucket.bucket
+  s3_bucket = var.bucket_name
   s3_key = aws_s3_bucket_object.object.key
 
   description = var.type == "nodejs" ? "Node Framework used to access DynamoDB" : "Python Framework used to access DynamoDB"

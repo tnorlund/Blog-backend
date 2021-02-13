@@ -4,10 +4,24 @@ provider "aws" {
   region                  = "us-west-2"
 }
 
-module "layer" {
+module "layer_bucket" {
+  source = "./LambdaLayerBucket"
+  developer = "Tyler Norlund"
+}
+
+module "python_layer" {
   source = "./LambdaLayer"
   type = "python"
   path = ".."
+  bucket_name = module.layer_bucket.bucket_name
+  developer = "Tyler Norlund"
+}
+
+module "node_layer" {
+  source = "./LambdaLayer"
+  type = "nodejs"
+  path = ".."
+  bucket_name = module.layer_bucket.bucket_name
   developer = "Tyler Norlund"
 }
 
