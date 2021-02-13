@@ -28,7 +28,7 @@ jobs:
         python -m pip install -e "code/python/.[testing]"
     - name: Install node dependencies
       run: |
-        cd code/node/@tnorlund:analytics/
+        cd code/nodejs/@tnorlund:analytics/
         npm ci 
         npm i -g jest
         cd ../../../
@@ -44,5 +44,5 @@ jobs:
         cors: '*'
     - name: Test with jest
       run: |
-        cd code/node/@tnorlund:analytics/
+        cd code/nodejs/@tnorlund:analytics/
         npm test
