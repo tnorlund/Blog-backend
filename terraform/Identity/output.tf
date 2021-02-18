@@ -29,3 +29,8 @@ output "api_gateway_arn" {
   value = aws_api_gateway_rest_api.main.arn
   description = "The ARN of API Gateway"
 }
+
+output "api_gateway_endpoint" {
+  value = aws_cognito_user_pool.main.endpoint
+  description = "The HTTP endpoint for the REST API"
+}
