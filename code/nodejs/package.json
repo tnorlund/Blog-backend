@@ -22,7 +22,6 @@
     "jest-in-case": "^1.0.2"
   },
   "jest": {
-    "verbose": true,
     "collectCoverage": true
   },
   "dependencies": {
