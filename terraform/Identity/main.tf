@@ -19,7 +19,8 @@ resource "aws_api_gateway_rest_api" "main" {
 # Cognito
 resource "aws_cognito_user_pool" "main" {
   name = "${var.user_pool_name}_${var.stage}"
-  alias_attributes = ["email", "preferred_username"]
+  username_attributes = [ "email" ]
+  auto_verified_attributes = ["email"]
   schema {
     attribute_data_type = "String"
     mutable             = true
@@ -41,24 +42,17 @@ resource "aws_cognito_user_pool" "main" {
     require_uppercase = true
   }
   mfa_configuration        = "OFF"
-  verification_message_template {
-    default_email_option  = "CONFIRM_WITH_LINK"
-    email_message_by_link = "Your life will be dramatically improved by signing up! {##Click Here##}"
-    email_subject_by_link = "Welcome to to a new world and life!"
-  }
-  email_configuration {
-    reply_to_email_address = "a-email-for-people-to@reply.to"
-  }
-  device_configuration {
-    challenge_required_on_new_device      = true
-    device_only_remembered_on_user_prompt = true
+
+  lambda_config {
+    custom_message    = aws_lambda_function.custom_message.arn
+    post_confirmation = aws_lambda_function.post_confirmation.arn
   }
 }
 
  resource "aws_cognito_user_pool_client" "client" {
     name                = "client"
     user_pool_id        = aws_cognito_user_pool.main.id
-    generate_secret     = true
+    generate_secret     = false
     explicit_auth_flows = ["ADMIN_NO_SRP_AUTH"]
  }
 
@@ -168,71 +162,157 @@ resource "aws_iam_role_policy" "unauth" {
   role   = aws_iam_role.unauth.id
 }
 
-#  resource "aws_iam_role" "auth_iam_role" {
-#       name = "auth_iam_role"
-#       assume_role_policy = <<EOF
-#  {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Sid": "",
-#       "Effect": "Allow",
-#       "Action": [
-#         firehose:ListDeliveryStreams,
-#         firehose:PutRecord,
-#         firehose:PutRecordBatch,
-#         execute-api:Invoke,
-#         execute-api:ManageConnections,
-#         execute-api:InvalidateCache
-#       ],
-#       "Resource": [
-#         ${var.firehose_arn},
-#         ${aws_api_gateway_rest_api.main.execution_arn}/${var.stage}/GET/*,
-#         ${aws_api_gateway_rest_api.main.execution_arn}/${var.stage}/POST/*,
-#         ${aws_api_gateway_rest_api.main.execution_arn}/${var.stage}/DELETE/*
-#       ],
-#       "Principal": {
-#         "Federated": "cognito-identity.amazonaws.com"
-#       }
-#     }
-#   ]
-#  }
-#  EOF
-#  }
 
-# resource "aws_iam_role" "unauth_iam_role" {
-#   name = "unauth_iam_role"
-#   assume_role_policy = <<EOF
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Action": "sts:AssumeRole",
-#       "Principal": {
-#         "Federated": "cognito-identity.amazonaws.com"
-#       },
-#       "Effect": "Allow",
-#       "Sid": ""
-#     }
-#   ]
-# }
-# EOF
-# }
+data "aws_iam_policy_document" "custom_message" {
+  statement {
+    effect="Allow"
+    actions = [
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "logs:CreateLogStream",
+      "logs:CreateLogGroup",
+      "logs:PutLogEvents"
+    ]
+    resources = [
+      "arn:aws:logs:*",
+      var.dynamo_arn
+    ]
+    sid = "authCommitId"
+  }
+}
+resource "aws_iam_role" "custom_message" {
+   name = "custommessage"
+   assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      }
+    }
+  ]
+}
+EOF
+}
+resource "aws_iam_role_policy" "custom_message" {
+  policy = data.aws_iam_policy_document.custom_message.json
+  role   = aws_iam_role.custom_message.id
+}
+data "archive_file" "custom_message" {
+  type = "zip"
+  source_file = "${var.custom_message_path}/${var.custom_message_file_name}.js"
+  output_path = "${var.custom_message_path}/${var.custom_message_file_name}.zip"
+}
+resource "aws_lambda_function" "custom_message" {
+  filename         = "${var.custom_message_path}/${var.custom_message_file_name}.zip"
+  function_name    = var.custom_message_file_name
+  role             = aws_iam_role.custom_message.arn
+  handler          = "${var.custom_message_file_name}.handler"
+  source_code_hash = filebase64sha256("${var.custom_message_path}/${var.custom_message_file_name}.zip")
+  runtime          = "nodejs12.x"
+  timeout          = 10
+  layers           = [ var.node_layer_arn ]
+  environment {
+    variables = {
+      TABLE_NAME = var.table_name
+      RESOURCENAME = "blogAuthCustomMessage"
+      REGION = "us-west-2"
+    }
+  }
+  tags = {
+    Name = var.developer
+  }
+  depends_on = [
+    data.archive_file.custom_message, 
+  ]
+}
+resource "aws_lambda_permission" "custom_message" {
+  statement_id  = "AllowExecutionFromCognito"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.custom_message.function_name
+  principal     = "cognito-idp.amazonaws.com"
+  source_arn    = aws_cognito_user_pool.main.arn
+}
 
-# resource "aws_iam_role_policy" "web_iam_unauth_role_policy" {
-#     name = "web_iam_unauth_role_policy"
-#     role = aws_iam_role.unauth_iam_role.id
-#     policy = <<EOF
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Sid": "",
-#       "Action": "*",
-#       "Effect": "Deny",
-#       "Resource": "*"
-#     }
-#   ]
-# }
-# EOF
-# }
+data "aws_iam_policy_document" "post_confirmation" {
+  statement {
+    effect="Allow"
+    actions = [
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "logs:CreateLogStream",
+      "logs:CreateLogGroup",
+      "logs:PutLogEvents",
+      "cognito-idp:AdminAddUserToGroup",
+      "cognito-idp:GetGroup",
+      "cognito-idp:CreateGroup"
+    ]
+    resources = [
+      "arn:aws:logs:*",
+      "${aws_cognito_identity_pool.main.arn}",
+      "${aws_api_gateway_rest_api.main.execution_arn}/${var.stage}/GET/*",
+      "${aws_api_gateway_rest_api.main.execution_arn}/${var.stage}/POST/*"
+    ]
+    sid = "codecommitid"
+  }
+}
+resource "aws_iam_role" "post_confirmation" {
+   name = "post_confirmation_${var.stage}"
+   assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "",
+      "Effect": "Allow",
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      }
+    }
+  ]
+}
+EOF
+}
+resource "aws_iam_role_policy" "post_confirmation" {
+  policy = data.aws_iam_policy_document.post_confirmation.json
+  role   = aws_iam_role.post_confirmation.id
+}
+data "archive_file" "post_confirmation" {
+  type = "zip"
+  source_file = "${var.post_confirmation_path}/${var.post_confirmation_file_name}.js"
+  output_path = "${var.post_confirmation_path}/${var.post_confirmation_file_name}.zip"
+}
+resource "aws_lambda_function" "post_confirmation" {
+  filename         = "${var.post_confirmation_path}/${var.post_confirmation_file_name}.zip"
+  function_name    = var.post_confirmation_file_name
+  role             = aws_iam_role.post_confirmation.arn
+  handler          = "${var.post_confirmation_file_name}.handler"
+  source_code_hash = filebase64sha256("${var.post_confirmation_path}/${var.post_confirmation_file_name}.zip")
+  runtime          = "nodejs12.x"
+  timeout          = 10
+  layers           = [ var.node_layer_arn ]
+  environment {
+    variables = {
+      TABLE_NAME = var.table_name,
+      GROUP = "User"
+      REGION = "us-west-2"
+    }
+  }
+  tags = {
+    Name = var.developer
+  }
+  depends_on = [
+    data.archive_file.post_confirmation, 
+  ]
+}
+resource "aws_lambda_permission" "post_confirmation" {
+  statement_id  = "AllowExecutionFromCognito"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.post_confirmation.function_name
+  principal     = "cognito-idp.amazonaws.com"
+  source_arn    = aws_cognito_user_pool.main.arn
+}

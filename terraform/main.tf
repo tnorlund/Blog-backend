@@ -58,7 +58,63 @@ module "identity" {
   identity_pool_name = "blog_identity_pool"
   firehose_arn = module.analytics.firehose_arn
   api_name = "blog-api"
+  custom_message_path = "../code/lambda"
+  custom_message_file_name = "custom_message"
+  post_confirmation_path = "../code/lambda"
+  post_confirmation_file_name = "post_confirmation"
+  dynamo_arn = module.analytics.dynamo_arn
+  table_name = module.analytics.dynamo_table_name
+  node_layer_arn = module.node_layer.arn
 }
+
+module "api_blog" {
+  source = "./API_blog"
+  get_path = "../code/lambda"
+  get_file_name = "get_blog"
+  post_path = "../code/lambda"
+  post_file_name = "post_blog"
+  method_name = "getBlog"
+  api_gateway_id = module.identity.api_gateway_id
+  api_gateway_execution_arn = module.identity.api_gateway_execution_arn
+  api_gateway_arn = module.identity.api_gateway_arn
+  api_gateway_root_resource_id = module.identity.api_gateway_root_resource_id
+  developer = "Tyler Norlund"
+  table_name = module.analytics.dynamo_table_name
+  dynamo_arn = module.analytics.dynamo_arn
+  node_layer_arn = module.node_layer.arn
+}
+
+# module "getBlog" {
+#   source = "./API_Get"
+#   path = "../code/lambda"
+#   file_name = "get_blog"
+#   method_name = "getBlog"
+#   method_path = "blog"
+#   api_gateway_id = module.identity.api_gateway_id
+#   api_gateway_execution_arn = module.identity.api_gateway_execution_arn
+#   api_gateway_arn = module.identity.api_gateway_arn
+#   api_gateway_root_resource_id = module.identity.api_gateway_root_resource_id
+#   developer = "Tyler Norlund"
+#   table_name = module.analytics.dynamo_table_name
+#   dynamo_arn = module.analytics.dynamo_arn
+#   node_layer_arn = module.node_layer.arn
+# }
+
+# module "addBlog" {
+#   source = "./API_Post"
+#   path = "../code/lambda"
+#   file_name = "add_blog"
+#   method_name = "addBlog"
+#   method_path = "blog"
+#   api_gateway_id = module.identity.api_gateway_id
+#   api_gateway_execution_arn = module.identity.api_gateway_execution_arn
+#   api_gateway_arn = module.identity.api_gateway_arn
+#   api_gateway_root_resource_id = module.identity.api_gateway_root_resource_id
+#   developer = "Tyler Norlund"
+#   table_name = module.analytics.dynamo_table_name
+#   dynamo_arn = module.analytics.dynamo_arn
+#   node_layer_arn = module.node_layer.arn
+# }
 
 output "identity_pool_id" {
   value = module.identity.identity_pool_id

@@ -31,3 +31,38 @@ variable "api_name" {
   type = string
   description = "The name of the API Gateway resource"
 }
+
+variable "custom_message_path" {
+  type = string
+  description = "The path to the custom message Lambda Function"
+}
+
+variable "custom_message_file_name" {
+  type = string
+  description = "The file name of the custom message Lambda Function"
+}
+
+variable "post_confirmation_path" {
+  type = string
+  description = "The path to the post confirmation Lambda Function"
+}
+
+variable "post_confirmation_file_name" {
+  type = string
+  description = "The file name of the post confirmation Lambda Function"
+}
+
+variable "node_layer_arn" {
+  type = string
+  description = "The ARN of the Lambda Layer"
+}
+
+variable "table_name" {
+  type = string
+  description = "The name of the DynamoDB table"
+}
+
+variable "dynamo_arn"{
+  type = string
+  description = "The ARN of the DynamoDB table"
+}

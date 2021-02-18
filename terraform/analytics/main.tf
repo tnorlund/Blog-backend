@@ -74,7 +74,7 @@ resource "aws_dynamodb_table" "table" {
 }
 
 
-# Use a Lambd Function to process the DynamoDB stream
+# Use a Lambda Function to process the DynamoDB stream
 data "aws_iam_policy_document" "lambda_policy_doc" {
   # The Lambda function needs accesss to the DynamoDB table and the stream.
   statement {
