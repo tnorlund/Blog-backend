@@ -1,8 +1,41 @@
-const { Blog, User, blogFromItem } = require( `/opt/nodejs/index` )
+const { Blog, User, blogFromItem, addUser } = require( `/opt/nodejs/index` )
 const AWS = require( `aws-sdk` )
 const dynamoDB = new AWS.DynamoDB()
 
+/**
+ * The Lambda Function's invocation context.
+ * @typedef {CallerContext}
+ * @param {string} clientId The Cognito User Pool Client ID.
+ */
+
+/**
+ * The request made from the client.
+ * @typedef {Request}
+ * @param {string} codeParameter The 4 digits the user uses to verify their
+ *   email address.
+ */
+
+/**
+ * The Cognito event.
+ * @typedef {Object} Event 
+ * @property {CallerContext} callerContext The Lambda Function's invocation
+ *   context.
+ * @property {string} triggerSource Where the Lambda Function is being
+ *   triggered.
+ * @property {string} region The AWS region the Cognito User Pool is in.
+ * @property {Request} request The request sent from the client.
+ * @property {Object} response The response sent to Cognito.
+ * @property {string} userName The user name of the user signing up.
+ */
+
+/**
+ * Sends a custom message to the user's email after signing up.
+ * @param {Event} event The event triggered by Cognito.
+ * @param {Object} context The context of the Lambda Function's event.
+ * @param {Function} callback The callback for the Lambda Function.
+ */
 exports.handler = ( event, context, callback ) => {
+  console.log( { event } )
   // Define the URL that you want the user to be directed to after verification
   // is complete
   if ( event.triggerSource === `CustomMessage_SignUp` ) {
@@ -38,9 +71,6 @@ exports.handler = ( event, context, callback ) => {
     ).toString( `base64` )
 
     // Set the response
-    // eslint-disable-next-line max-len
-    // const bucketUrl = `http://${resourcePrefix}verificationbucket-${process.env.ENV}.s3-website${separator}${region}.amazonaws.com`
-    // const url = `${bucketUrl}/?data=${payload}&code=${codeParameter}`
     /**
      * The url used to verify the email address should be the domain used in the blog.
      */
@@ -49,7 +79,12 @@ exports.handler = ( event, context, callback ) => {
     event.response.smsMessage = message
     event.response.emailSubject = process.env.EMAILSUBJECT
     event.response.emailMessage = message
+
     let blog = new Blog( {} )
+
+    await addUser( {
+
+    } )
     // dynamoDB.updateItem( {
     //   TableName: tableName,
     //   Key: blog.key(),

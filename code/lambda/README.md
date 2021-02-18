@@ -1,12 +1,14 @@
-# Lambda
+# Custom Message
+Emails a custom message to the user when they sign up.
 
-Here are all the Lambda functions used.
+# Dynamo Processor
+Aggregates data on DynamoDB accesses.
 
-## Dynamo Processor
-This aggregates the data sent to DynamoDB.
+# Kinesis Processor
+Aggregates data on POST to Kinesis Firehose.
 
-## Kinesis Processor
-This aggregates the data sent through Kinesis Firehose. 
+# REST API
+Handle the REST API `POST`, `GET`, and `OPTION` calls.
 
-## S3 Processor
-This processes the data sent from the [Kinesis Processor](#kinesis_processor) to the S3 bucket.
+# S3 Processor
+Aggregates and uploads data to DynamoDB.

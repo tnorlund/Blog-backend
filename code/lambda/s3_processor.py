@@ -8,7 +8,17 @@ from dynamo.data import S3Client, DynamoClient
 from dynamo.processing import processDF
 from dynamo.entities import Visitor, Session, Visit
 
+
 def s3_processor(event, context):
+  """[summary]
+
+  Args:
+      event ([type]): [description]
+      context ([type]): [description]
+
+  Returns:
+      [type]: [description]
+  """  
   new = 0
   updated = 0
   additional = 0
