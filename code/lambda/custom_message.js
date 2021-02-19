@@ -60,7 +60,7 @@ exports.handler = async ( event, context, callback ) => {
      * The url is changed to localhost when under development.
      */
     let url
-    if( process.env.ENV && process.env.ENV == 'dev' ) url = `localhost:8000?data=${ 
+    if( process.env.ENV && process.env.ENV == 'dev' ) url = `localhost:8000/?data=${ 
       payload }&code=${ codeParameter }`
     else url = `https://www.tylernorlund.com/?data=${
       payload }&code=${ codeParameter }`

@@ -208,7 +208,7 @@ data "archive_file" "custom_message" {
 }
 resource "aws_lambda_function" "custom_message" {
   filename         = "${var.custom_message_path}/${var.custom_message_file_name}.zip"
-  function_name    = var.custom_message_file_name
+  function_name    = "${var.custom_message_file_name}_${var.stage}"
   role             = aws_iam_role.custom_message.arn
   handler          = "${var.custom_message_file_name}.handler"
   source_code_hash = filebase64sha256("${var.custom_message_path}/${var.custom_message_file_name}.zip")
@@ -218,6 +218,7 @@ resource "aws_lambda_function" "custom_message" {
   environment {
     variables = {
       TABLE_NAME = var.table_name
+      ENV = var.stage
       RESOURCENAME = "blogAuthCustomMessage"
       REGION = "us-west-2"
     }
@@ -252,7 +253,7 @@ data "aws_iam_policy_document" "post_confirmation" {
     ]
     resources = [
       "arn:aws:logs:*",
-      "${aws_cognito_identity_pool.main.arn}",
+      aws_cognito_user_pool.main.arn,
       "${aws_api_gateway_rest_api.main.execution_arn}/${var.stage}/GET/*",
       "${aws_api_gateway_rest_api.main.execution_arn}/${var.stage}/POST/*"
     ]
@@ -288,7 +289,7 @@ data "archive_file" "post_confirmation" {
 }
 resource "aws_lambda_function" "post_confirmation" {
   filename         = "${var.post_confirmation_path}/${var.post_confirmation_file_name}.zip"
-  function_name    = var.post_confirmation_file_name
+  function_name    = "${var.post_confirmation_file_name}_${var.stage}"
   role             = aws_iam_role.post_confirmation.arn
   handler          = "${var.post_confirmation_file_name}.handler"
   source_code_hash = filebase64sha256("${var.post_confirmation_path}/${var.post_confirmation_file_name}.zip")
@@ -297,6 +298,7 @@ resource "aws_lambda_function" "post_confirmation" {
   layers           = [ var.node_layer_arn ]
   environment {
     variables = {
+      ENV = var.stage
       TABLE_NAME = var.table_name,
       GROUP = "User"
       REGION = "us-west-2"
