@@ -1,8 +1,9 @@
-/* eslint-disable-line */ 
+
 const aws = require( `aws-sdk` )
-const { addBlog } = require("../nodejs/data/blog")
-const { 
-  Blog, User, getBlog, incrementNumberBlogUsers, addUser 
+const {
+  Blog, User,
+  addBlog, getBlog,
+  incrementNumberBlogUsers, addUser
 } = require( `/opt/nodejs/index` )
 
 /**
@@ -33,7 +34,7 @@ const {
 
 /**
  * The Cognito event.
- * @typedef {Object} Event 
+ * @typedef {Object} Event
  * @property {CallerContext} callerContext The Lambda Function's invocation
  *   context.
  * @property {string} triggerSource Where the Lambda Function is being
@@ -60,10 +61,10 @@ exports.handler = async ( event, context, callback ) => {
    * The Cognito Identity Pool Provider used to get the User Pool Group details
    *   and add the user to the User Pool Group.
    */
-  const cognito_idp = new aws.cognito_idp( { 
-    apiVersion: `2016-04-18` 
+  const cognito_idp = new aws.CognitoIdentityServiceProvider( {
+    apiVersion: `2016-04-18`
   } )
-  
+
   /**
    * The group parameters used in the 'Get' and 'Create' User Pool Groups.
    */
@@ -93,11 +94,14 @@ exports.handler = async ( event, context, callback ) => {
     console.log( { incrementError } )
     callback( incrementError )
   }
-  const { user, error: userError } = await addUser( new User( {
-    name: event.request.userAttributes.name,
-    email: event.request.userAttributes.email,
-    userNumber: incrementedBlog.numberUsers
-  } ) )
+  const { user, error: userError } = await addUser( 
+    process.env.TABLE_NAME, 
+    new User( {
+      name: event.request.userAttributes.name,
+      email: event.request.userAttributes.email,
+      userNumber: incrementedBlog.numberUsers
+    } ) 
+  )
   if ( userError ) {
     console.log( { userError } )
     callback( userError )

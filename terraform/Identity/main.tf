@@ -215,6 +215,8 @@ resource "aws_lambda_function" "custom_message" {
   runtime          = "nodejs12.x"
   timeout          = 10
   layers           = [ var.node_layer_arn ]
+  description      = "An Amazon Cognito Pool trigger that composes a unique message after a user signs up"
+
   environment {
     variables = {
       TABLE_NAME = var.table_name
@@ -242,6 +244,7 @@ data "aws_iam_policy_document" "post_confirmation" {
   statement {
     effect="Allow"
     actions = [
+      "dynamodb:GetItem",
       "dynamodb:PutItem",
       "dynamodb:UpdateItem",
       "logs:CreateLogStream",
@@ -254,8 +257,7 @@ data "aws_iam_policy_document" "post_confirmation" {
     resources = [
       "arn:aws:logs:*",
       aws_cognito_user_pool.main.arn,
-      "${aws_api_gateway_rest_api.main.execution_arn}/${var.stage}/GET/*",
-      "${aws_api_gateway_rest_api.main.execution_arn}/${var.stage}/POST/*"
+      var.dynamo_arn
     ]
     sid = "codecommitid"
   }
@@ -296,6 +298,7 @@ resource "aws_lambda_function" "post_confirmation" {
   runtime          = "nodejs12.x"
   timeout          = 10
   layers           = [ var.node_layer_arn ]
+  description      = "An Amazon Cognito Pool trigger that adds a user to a User Pool and DynamoDB"
   environment {
     variables = {
       ENV = var.stage

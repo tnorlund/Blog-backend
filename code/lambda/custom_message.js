@@ -1,5 +1,4 @@
-const AWS = require( `aws-sdk` )
-const dynamoDB = new AWS.DynamoDB()
+'use-strict'
 
 /**
  * The Lambda Function's invocation context.
