@@ -1,5 +1,9 @@
 /* eslint-disable-line */ 
 const aws = require( `aws-sdk` )
+const { addBlog } = require("../nodejs/data/blog")
+const { 
+  Blog, User, getBlog, incrementNumberBlogUsers, addUser 
+} = require( `/opt/nodejs/index` )
 
 /**
  * The Lambda Function's invocation context.
@@ -52,6 +56,10 @@ const aws = require( `aws-sdk` )
  */
 exports.handler = async ( event, context, callback ) => {
 
+  /**
+   * The Cognito Identity Pool Provider used to get the User Pool Group details
+   *   and add the user to the User Pool Group.
+   */
   const cognito_idp = new aws.cognito_idp( { 
     apiVersion: `2016-04-18` 
   } )
@@ -73,6 +81,29 @@ exports.handler = async ( event, context, callback ) => {
     Username: event.userName,
   }
 
+  /** The details of the blog */
+  const { blog: blogResponse, error: blogError} = await getBlog( process.env.TABLE_NAME )
+  if ( blogError == 'Blog does not exist' ) await addBlog( process.env.TABLE_NAME, new Blog( {} ) )
+  else if ( blogError ) {
+    console.log( { blogError } )
+    callback( blogError )
+  }
+  const { blog: incrementedBlog, error: incrementError } = await incrementNumberBlogUsers( process.env.TABLE_NAME )
+  if ( incrementError ) {
+    console.log( { incrementError } )
+    callback( incrementError )
+  }
+  const { user, error: userError } = await addUser( new User( {
+    name: event.request.userAttributes.name,
+    email: event.request.userAttributes.email,
+    userNumber: incrementedBlog.numberUsers
+  } ) )
+  if ( userError ) {
+    console.log( { userError } )
+    callback( userError )
+  }
+
+
   /**
    * Attempt to get the group details in order to ensure that the group exists.
    *   If it doesn't create the Cognito User Pool Group.
@@ -80,7 +111,6 @@ exports.handler = async ( event, context, callback ) => {
   try {
     await cognito_idp.getGroup( groupParams ).promise()
   } catch ( error ) {
-    console.log( { error } )
     await cognito_idp.createGroup( groupParams ).promise()
   }
 

@@ -1,4 +1,3 @@
-const { Blog, User, blogFromItem, addUser } = require( `/opt/nodejs/index` )
 const AWS = require( `aws-sdk` )
 const dynamoDB = new AWS.DynamoDB()
 
@@ -71,12 +70,6 @@ exports.handler = async ( event, context, callback ) => {
     event.response.smsMessage = `Use the link to verify your phone number. \n ${ url }`
     event.response.emailSubject = process.env.EMAILSUBJECT
     event.response.emailMessage = `Use the link to verify your email address. \n ${ url }`
-
-    let blog = new Blog( {} )
-
-    // await Promise( addUser( {
-
-    // } ) )
     callback( null, event )
   } else {
     callback( null, event )
