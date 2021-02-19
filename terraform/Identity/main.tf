@@ -15,7 +15,6 @@ resource "aws_api_gateway_rest_api" "main" {
   name = var.api_name
 }
 
-
 # Cognito
 resource "aws_cognito_user_pool" "main" {
   name = "${var.user_pool_name}_${var.stage}"
@@ -74,6 +73,57 @@ resource "aws_cognito_identity_pool_roles_attachment" "main" {
     authenticated   = aws_iam_role.auth.arn
     unauthenticated = aws_iam_role.unauth.arn
   }
+}
+
+resource "aws_cognito_user_group" "user" {
+  name         = "user-group"
+  user_pool_id = aws_cognito_user_pool.main.id
+  description  = "Users that have signed up and verified their emails"
+  precedence   = 1
+  role_arn     = aws_iam_role.user.arn
+}
+
+data "aws_iam_policy_document" "user_policy" {
+  statement {
+    effect="Allow"
+    actions = [
+      "firehose:ListDeliveryStreams",
+      "firehose:PutRecord",
+      "firehose:PutRecordBatch",
+      "execute-api:Invoke",
+      "execute-api:ManageConnections",
+      "execute-api:InvalidateCache"
+    ]
+    resources = [
+      var.firehose_arn,
+      "${aws_api_gateway_rest_api.main.execution_arn}/${var.stage}/GET/*",
+      "${aws_api_gateway_rest_api.main.execution_arn}/${var.stage}/POST/*",
+      "${aws_api_gateway_rest_api.main.execution_arn}/${var.stage}/DELETE/*"
+    ]
+    sid = "authCommitId"
+  }
+}
+resource "aws_iam_role" "user" {
+   name = "user_role"
+
+   assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Principal": {
+        "Federated": "cognito-identity.amazonaws.com"
+      }
+    }
+  ]
+}
+EOF
+}
+resource "aws_iam_role_policy" "user" {
+  policy = data.aws_iam_policy_document.user_policy.json
+  role   = aws_iam_role.user.id
 }
 
 data "aws_iam_policy_document" "auth_policy" {

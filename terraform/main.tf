@@ -89,6 +89,23 @@ module "api_blog" {
   node_layer_arn               = module.node_layer.arn
 }
 
+module "api_project" {
+  source                       = "./API_project"
+  get_path                     = "../code/lambda"
+  get_file_name                = "get_project"
+  post_path                    = "../code/lambda"
+  post_file_name               = "post_project"
+  method_name                  = "getProject"
+  api_gateway_id               = module.identity.api_gateway_id
+  api_gateway_execution_arn    = module.identity.api_gateway_execution_arn
+  api_gateway_arn              = module.identity.api_gateway_arn
+  api_gateway_root_resource_id = module.identity.api_gateway_root_resource_id
+  developer                    = "Tyler Norlund"
+  table_name                   = module.analytics.dynamo_table_name
+  dynamo_arn                   = module.analytics.dynamo_arn
+  node_layer_arn               = module.node_layer.arn
+}
+
 output "GATSBY_API_BLOG_ENDPOINT" {
   value = module.identity.api_gateway_endpoint
 }
