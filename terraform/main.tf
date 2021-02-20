@@ -93,6 +93,8 @@ module "api_project" {
   source                       = "./API_project"
   get_path                     = "../code/lambda"
   get_file_name                = "get_project"
+  get_details_path             = "../code/lambda"
+  get_details_file_name        = "get_project_details"
   post_path                    = "../code/lambda"
   post_file_name               = "post_project"
   method_name                  = "getProject"
@@ -106,8 +108,17 @@ module "api_project" {
   node_layer_arn               = module.node_layer.arn
 }
 
+module "api_deployment" {
+  source         = "./API_deploy"
+  api_gateway_id = module.identity.api_gateway_id
+  integrations   = concat(
+    module.api_blog.integrations,
+    module.api_project.integrations
+  )
+}
+
 output "GATSBY_API_BLOG_ENDPOINT" {
-  value = module.identity.api_gateway_endpoint
+  value = module.api_deployment.invoke_url
 }
 
 output "GATSBY_COGNITO_IDENTITY_POOL_ID" {
@@ -141,3 +152,7 @@ output "GATSBY_ANALYTICS_REGION" {
 output "GATSBY_API_BLOG_NAME" {
   value = var.api_name
 }
+
+# output "GATSBY_API_BLOG_ENDPOINT" {
+#   value = module.api_project.aws_api_gateway_resource
+# }

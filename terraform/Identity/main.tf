@@ -75,10 +75,18 @@ resource "aws_cognito_identity_pool_roles_attachment" "main" {
   }
 }
 
-resource "aws_cognito_user_group" "user" {
-  name         = "user-group"
+resource "aws_cognito_user_group" "User" {
+  name         = "User"
   user_pool_id = aws_cognito_user_pool.main.id
   description  = "Users that have signed up and verified their emails"
+  precedence   = 2
+  role_arn     = aws_iam_role.user.arn
+}
+
+resource "aws_cognito_user_group" "Admin" {
+  name         = "Admin"
+  user_pool_id = aws_cognito_user_pool.main.id
+  description  = "Administrators that can modify the backend"
   precedence   = 1
   role_arn     = aws_iam_role.user.arn
 }

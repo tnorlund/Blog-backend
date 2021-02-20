@@ -24,6 +24,16 @@ variable "get_file_name" {
   description = "The name of the file used in the GET Lambda function"
 }
 
+variable "get_details_path" {
+  type = string
+  description = "The path to the file used in the GET project details Lambda Function"
+}
+
+variable "get_details_file_name" {
+  type = string
+  description = "The name of the file used in the GET project details Lambda function"
+}
+
 variable "post_path" {
   type = string
   description = "The path to the file used in the POST Lambda Function"

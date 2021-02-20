@@ -35,28 +35,28 @@ resource "aws_api_gateway_integration" "post_blog" {
   uri                     = aws_lambda_function.post_blog.invoke_arn
 }
 
-resource "aws_api_gateway_deployment" "blog" {
-  rest_api_id = var.api_gateway_id
-  stage_name  = "prod"
-  triggers = {
-    redeployment = sha1(
-      join( 
-        ",", 
-        list( 
-          jsonencode( aws_api_gateway_integration.post_blog ), 
-          jsonencode( aws_api_gateway_integration.get_blog ), 
+# resource "aws_api_gateway_deployment" "blog" {
+#   rest_api_id = var.api_gateway_id
+#   stage_name  = "prod"
+#   triggers = {
+#     redeployment = sha1(
+#       join( 
+#         ",", 
+#         list( 
+#           jsonencode( aws_api_gateway_integration.post_blog ), 
+#           jsonencode( aws_api_gateway_integration.get_blog ), 
 
-        )
-      )
-    )
-  }
-  depends_on = [
-    aws_api_gateway_method.get_blog,
-    aws_api_gateway_integration.get_blog,
-    aws_api_gateway_method.post_blog,
-    aws_api_gateway_integration.post_blog,
-  ]
-}
+#         )
+#       )
+#     )
+#   }
+#   depends_on = [
+#     aws_api_gateway_method.get_blog,
+#     aws_api_gateway_integration.get_blog,
+#     aws_api_gateway_method.post_blog,
+#     aws_api_gateway_integration.post_blog,
+#   ]
+# }
 
 resource "aws_api_gateway_documentation_part" "blog" {
   location {

@@ -3,28 +3,41 @@ resource "aws_api_gateway_resource" "project" {
   parent_id   = var.api_gateway_root_resource_id
   rest_api_id = var.api_gateway_id
 }
-resource "aws_api_gateway_deployment" "blog" {
+resource "aws_api_gateway_resource" "project_details" {
+  path_part = "project-details"
+  parent_id   = var.api_gateway_root_resource_id
   rest_api_id = var.api_gateway_id
-  stage_name  = "prod"
-  triggers = {
-    redeployment = sha1(
-      join( 
-        ",", 
-        list( 
-          jsonencode( aws_api_gateway_integration.post_project ), 
-          jsonencode( aws_api_gateway_integration.get_project ), 
-
-        )
-      )
-    )
-  }
-  depends_on = [
-    aws_api_gateway_method.get_project,
-    aws_api_gateway_integration.get_project,
-    aws_api_gateway_method.post_project,
-    aws_api_gateway_integration.post_project,
-  ]
 }
+# resource "aws_api_gateway_resource" "project_follow" {
+#   path_part = "project-follow"
+#   parent_id   = var.api_gateway_root_resource_id
+#   rest_api_id = var.api_gateway_id
+# }
+
+# resource "aws_api_gateway_deployment" "project" {
+#   rest_api_id = var.api_gateway_id
+#   stage_name  = "prod"
+#   triggers = {
+#     redeployment = sha1(
+#       join( 
+#         ",", 
+#         list( 
+#           jsonencode( aws_api_gateway_integration.post_project ), 
+#           jsonencode( aws_api_gateway_integration.get_project ), 
+#           jsonencode( aws_api_gateway_integration.get_project_details ), 
+#         )
+#       )
+#     )
+#   }
+#   depends_on = [
+#     aws_api_gateway_method.get_project_details,
+#     aws_api_gateway_integration.get_project_details,
+#     aws_api_gateway_method.get_project,
+#     aws_api_gateway_integration.get_project,
+#     aws_api_gateway_method.post_project,
+#     aws_api_gateway_integration.post_project,
+#   ]
+# }
 
 resource "aws_api_gateway_method" "get_project" {
   rest_api_id   = var.api_gateway_id
@@ -120,6 +133,54 @@ resource "aws_lambda_function" "get_project" {
   ]
 }
 
+resource "aws_api_gateway_method" "get_project_details" {
+  rest_api_id   = var.api_gateway_id
+  resource_id   = aws_api_gateway_resource.project_details.id
+  http_method   = "GET"
+  authorization = "NONE"
+}
+resource "aws_api_gateway_integration" "get_project_details" {
+  rest_api_id             = var.api_gateway_id
+  resource_id             = aws_api_gateway_resource.project_details.id
+  http_method             = aws_api_gateway_method.get_project_details.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.get_project_details.invoke_arn
+}
+resource "aws_lambda_permission" "get_project_details" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.get_project_details.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${var.api_gateway_execution_arn}/*/${aws_api_gateway_method.get_project_details.http_method}${aws_api_gateway_resource.project_details.path}"
+}
+data "archive_file" "get_project_details" {
+  type = "zip"
+  source_file = "${var.get_details_path}/${var.get_details_file_name}.js"
+  output_path = "${var.get_details_path}/${var.get_details_file_name}.zip"
+}
+resource "aws_lambda_function" "get_project_details" {
+  filename         = "${var.get_details_path}/${var.get_details_file_name}.zip"
+  function_name    = var.get_details_file_name
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "${var.get_details_file_name}.handler"
+  source_code_hash = filebase64sha256("${var.get_details_path}/${var.get_details_file_name}.zip")
+  runtime          = "nodejs12.x"
+  timeout          = 10
+  layers           = [ var.node_layer_arn ]
+  description      = "GET the project details for the REST API"
+  environment {
+    variables = {
+      TABLE_NAME = var.table_name
+    }
+  }
+  tags = {
+    Name = var.developer
+  }
+  depends_on = [
+    data.archive_file.get_project_details, 
+  ]
+}
 
 resource "aws_api_gateway_method" "post_project" {
   rest_api_id   = var.api_gateway_id
