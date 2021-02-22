@@ -25,7 +25,7 @@ exports.handler = async ( event, context ) => {
     headers: {
       'Access-Control-Allow-Origin' : '*'
     }, 
-    body: `Must give the name, email, and number in the query string.`,
+    body: `Must give the post's slug and title in the query string.`,
     isBase64Encoded: false
   }
   const { user, error } = await getPostDetails( 

@@ -14,34 +14,24 @@ variable "stage" {
   description = "The stage of the production."
 }
 
-variable "post_post_path" {
+variable "post_comment_path" {
   type = string
-  description = "The path to the POST post Lambda Function file"
+  description = "The path to the file used in the GET Lambda Function"
 }
 
-variable "post_post_file_name" {
+variable "post_comment_file_name" {
   type = string
-  description = "The name of the file used in the POST post Lambda function"
+  description = "The name of the file used in the GET Lambda function"
 }
 
-variable "get_post_path" {
+variable "post_reply_path" {
   type = string
-  description = "The path to the GET post Lambda Function file"
+  description = "The path to the file used in the GET project details Lambda Function"
 }
 
-variable "get_post_file_name" {
+variable "post_reply_file_name" {
   type = string
-  description = "The name of the file used in the GET post Lambda function"
-}
-
-variable "get_post_details_path" {
-  type = string
-  description = "The path to the GET post Lambda Function file"
-}
-
-variable "get_post_details_file_name" {
-  type = string
-  description = "The name of the file used in the GET post Lambda function"
+  description = "The name of the file used in the GET project details Lambda function"
 }
 
 variable "api_gateway_root_resource_id" {
@@ -68,7 +58,6 @@ variable "node_layer_arn" {
   type = string
   description = "The ARN of the Lambda Layer"
 }
-
 variable "dynamo_arn"{
   type = string
   description = "The ARN of the DynamoDB table"

@@ -14,34 +14,14 @@ variable "stage" {
   description = "The stage of the production."
 }
 
-variable "post_post_path" {
+variable "get_user_details_path" {
   type = string
-  description = "The path to the POST post Lambda Function file"
+  description = "The path to the file used in the GET Lambda Function"
 }
 
-variable "post_post_file_name" {
+variable "get_user_details_file_name" {
   type = string
-  description = "The name of the file used in the POST post Lambda function"
-}
-
-variable "get_post_path" {
-  type = string
-  description = "The path to the GET post Lambda Function file"
-}
-
-variable "get_post_file_name" {
-  type = string
-  description = "The name of the file used in the GET post Lambda function"
-}
-
-variable "get_post_details_path" {
-  type = string
-  description = "The path to the GET post Lambda Function file"
-}
-
-variable "get_post_details_file_name" {
-  type = string
-  description = "The name of the file used in the GET post Lambda function"
+  description = "The name of the file used in the GET Lambda function"
 }
 
 variable "api_gateway_root_resource_id" {

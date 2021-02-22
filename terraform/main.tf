@@ -98,11 +98,73 @@ module "api_project" {
   post_path                    = "../code/lambda"
   post_file_name               = "post_project"
   method_name                  = "getProject"
+  developer                    = "Tyler Norlund"
   api_gateway_id               = module.identity.api_gateway_id
   api_gateway_execution_arn    = module.identity.api_gateway_execution_arn
   api_gateway_arn              = module.identity.api_gateway_arn
   api_gateway_root_resource_id = module.identity.api_gateway_root_resource_id
+  table_name                   = module.analytics.dynamo_table_name
+  dynamo_arn                   = module.analytics.dynamo_arn
+  node_layer_arn               = module.node_layer.arn
+}
+
+module "api_comment" {
+  source                       = "./API_comment"
+  post_comment_path            = "../code/lambda"
+  post_comment_file_name       = "post_comment"
+  post_reply_path              = "../code/lambda"
+  post_reply_file_name         = "post_reply"
   developer                    = "Tyler Norlund"
+  api_gateway_id               = module.identity.api_gateway_id
+  api_gateway_execution_arn    = module.identity.api_gateway_execution_arn
+  api_gateway_arn              = module.identity.api_gateway_arn
+  api_gateway_root_resource_id = module.identity.api_gateway_root_resource_id
+  table_name                   = module.analytics.dynamo_table_name
+  dynamo_arn                   = module.analytics.dynamo_arn
+  node_layer_arn               = module.node_layer.arn
+}
+
+module "api_post" {
+  source                       = "./API_post"
+  post_post_path               = "../code/lambda"
+  post_post_file_name          = "post_post"
+  get_post_path                = "../code/lambda"
+  get_post_file_name           = "get_post"
+  get_post_details_path        = "../code/lambda"
+  get_post_details_file_name   = "get_post_details"
+  developer                    = "Tyler Norlund"
+  api_gateway_id               = module.identity.api_gateway_id
+  api_gateway_execution_arn    = module.identity.api_gateway_execution_arn
+  api_gateway_arn              = module.identity.api_gateway_arn
+  api_gateway_root_resource_id = module.identity.api_gateway_root_resource_id
+  table_name                   = module.analytics.dynamo_table_name
+  dynamo_arn                   = module.analytics.dynamo_arn
+  node_layer_arn               = module.node_layer.arn
+}
+
+module "api_tos" {
+  source                       = "./API_tos"
+  post_tos_path                = "../code/lambda"
+  post_tos_file_name           = "post_tos"
+  developer                    = "Tyler Norlund"
+  api_gateway_id               = module.identity.api_gateway_id
+  api_gateway_execution_arn    = module.identity.api_gateway_execution_arn
+  api_gateway_arn              = module.identity.api_gateway_arn
+  api_gateway_root_resource_id = module.identity.api_gateway_root_resource_id
+  table_name                   = module.analytics.dynamo_table_name
+  dynamo_arn                   = module.analytics.dynamo_arn
+  node_layer_arn               = module.node_layer.arn
+}
+
+module "api_user" {
+  source                       = "./API_user"
+  get_user_details_path        = "../code/lambda"
+  get_user_details_file_name   = "get_user_details"
+  developer                    = "Tyler Norlund"
+  api_gateway_id               = module.identity.api_gateway_id
+  api_gateway_execution_arn    = module.identity.api_gateway_execution_arn
+  api_gateway_arn              = module.identity.api_gateway_arn
+  api_gateway_root_resource_id = module.identity.api_gateway_root_resource_id
   table_name                   = module.analytics.dynamo_table_name
   dynamo_arn                   = module.analytics.dynamo_arn
   node_layer_arn               = module.node_layer.arn
@@ -113,7 +175,10 @@ module "api_deployment" {
   api_gateway_id = module.identity.api_gateway_id
   integrations   = concat(
     module.api_blog.integrations,
-    module.api_project.integrations
+    module.api_project.integrations,
+    module.api_comment.integrations,
+    module.api_post.integrations,
+    module.api_tos.integrations
   )
 }
 

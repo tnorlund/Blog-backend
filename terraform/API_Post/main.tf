@@ -1,76 +1,30 @@
-resource "aws_api_gateway_resource" "blog" {
-  path_part   = var.method_path
+resource "aws_api_gateway_resource" "post" {
+  path_part = "post"
+  parent_id   = var.api_gateway_root_resource_id
+  rest_api_id = var.api_gateway_id
+}
+resource "aws_api_gateway_resource" "post_details" {
+  path_part = "post-details"
   parent_id   = var.api_gateway_root_resource_id
   rest_api_id = var.api_gateway_id
 }
 
-resource "aws_api_gateway_method" "blog" {
+resource "aws_api_gateway_method" "post_post" {
   rest_api_id   = var.api_gateway_id
-  resource_id   = aws_api_gateway_resource.blog.id
+  resource_id   = aws_api_gateway_resource.post.id
   http_method   = "POST"
   authorization = "NONE"
 }
-
-resource "aws_api_gateway_integration" "blog" {
+resource "aws_api_gateway_integration" "post_post" {
   rest_api_id             = var.api_gateway_id
-  resource_id             = aws_api_gateway_resource.blog.id
-  http_method             = aws_api_gateway_method.blog.http_method
+  resource_id             = aws_api_gateway_resource.post.id
+  http_method             = aws_api_gateway_method.post_post.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.getBlog.invoke_arn
-}
-
-resource "aws_api_gateway_deployment" "blog" {
-  rest_api_id = var.api_gateway_id
-  stage_name  = "prod"
-  triggers = {
-    redeployment = sha1(
-      join( 
-        ",", 
-        list( jsonencode( aws_api_gateway_integration.blog ), )
-      )
-    )
-  }
-}
-
-resource "aws_api_gateway_documentation_part" "blog" {
-  location {
-    type = "METHOD"
-    method = aws_api_gateway_integration.blog.http_method
-    path = "/${aws_api_gateway_resource.blog.path_part}"
-  }
-  properties = "{\"description\":\"Gets the blog details.\"}"
-  rest_api_id = var.api_gateway_id
-}
-
-resource "aws_api_gateway_model" "blog" {
-  rest_api_id  = var.api_gateway_id
-  name         = var.method_name
-  description  = "a JSON schema"
-  content_type = "application/json"
-
-  schema = <<EOF
-{
-  "type": "object"
-}
-EOF
-}
-
-resource "aws_lambda_permission" "blog" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.getBlog.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${var.api_gateway_execution_arn}/*/*/*"
-}
-
-data "archive_file" "getBlog" {
-  type = "zip"
-  source_file = "${var.path}/${var.file_name}.js"
-  output_path = "${var.path}/${var.file_name}.zip"
+  uri                     = aws_lambda_function.post_post.invoke_arn
 }
 resource "aws_iam_role" "lambda_role" {
-  name               = var.method_name
+  name               = "api_post_${var.stage}"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -113,34 +67,139 @@ resource "aws_iam_role_policy" "lambda_policy" {
   policy = data.aws_iam_policy_document.lambda_policy_doc.json
   role   = aws_iam_role.lambda_role.id
 }
-resource "aws_lambda_function" "getBlog" {
-  filename      = "${var.path}/${var.file_name}.zip"
-  function_name = var.file_name
-  role          = aws_iam_role.lambda_role.arn
-  handler       = "${var.file_name}.handler"
-  source_code_hash = filebase64sha256("${var.path}/${var.file_name}.zip")
-  runtime = "nodejs12.x"
+
+
+resource "aws_lambda_permission" "post_post" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.post_post.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${var.api_gateway_execution_arn}/*/${aws_api_gateway_method.post_post.http_method}${aws_api_gateway_resource.post.path}"
+}
+data "archive_file" "post_post" {
+  type = "zip"
+  source_file = "${var.post_post_path}/${var.post_post_file_name}.js"
+  output_path = "${var.post_post_path}/${var.post_post_file_name}.zip"
+}
+resource "aws_lambda_function" "post_post" {
+  filename         = "${var.post_post_path}/${var.post_post_file_name}.zip"
+  function_name    = var.post_post_file_name
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "${var.post_post_file_name}.handler"
+  source_code_hash = filebase64sha256("${var.post_post_path}/${var.post_post_file_name}.zip")
+  runtime          = "nodejs12.x"
+  timeout          = 10
+  layers           = [ var.node_layer_arn ]
+  description      = "POST a post through the REST API"
   environment {
     variables = {
       TABLE_NAME = var.table_name
     }
   }
-  timeout = 10
-
   tags = {
-    Name    = var.developer
+    Name = var.developer
   }
-
-  layers            = [ var.node_layer_arn ]
-
   depends_on = [
-    data.archive_file.getBlog, 
-    aws_cloudwatch_log_group.getBlog
+    data.archive_file.post_post, 
   ]
 }
 
 
-resource "aws_cloudwatch_log_group" "getBlog" {
-  name              = "/aws/lambda/${var.method_name}"
-  retention_in_days = 14
+resource "aws_api_gateway_method" "get_post" {
+  rest_api_id   = var.api_gateway_id
+  resource_id   = aws_api_gateway_resource.post.id
+  http_method   = "GET"
+  authorization = "NONE"
+}
+resource "aws_api_gateway_integration" "get_post" {
+  rest_api_id             = var.api_gateway_id
+  resource_id             = aws_api_gateway_resource.post.id
+  http_method             = aws_api_gateway_method.get_post.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.get_post.invoke_arn
+}
+resource "aws_lambda_permission" "get_post" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.get_post.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${var.api_gateway_execution_arn}/*/${aws_api_gateway_method.get_post.http_method}${aws_api_gateway_resource.post.path}"
+}
+data "archive_file" "get_post" {
+  type = "zip"
+  source_file = "${var.get_post_path}/${var.get_post_file_name}.js"
+  output_path = "${var.get_post_path}/${var.get_post_file_name}.zip"
+}
+resource "aws_lambda_function" "get_post" {
+  filename         = "${var.get_post_path}/${var.get_post_file_name}.zip"
+  function_name    = var.get_post_file_name
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "${var.get_post_file_name}.handler"
+  source_code_hash = filebase64sha256("${var.get_post_path}/${var.get_post_file_name}.zip")
+  runtime          = "nodejs12.x"
+  timeout          = 10
+  layers           = [ var.node_layer_arn ]
+  description      = "POST a comment through the REST API"
+  environment {
+    variables = {
+      TABLE_NAME = var.table_name
+    }
+  }
+  tags = {
+    Name = var.developer
+  }
+  depends_on = [
+    data.archive_file.get_post, 
+  ]
+}
+
+
+resource "aws_api_gateway_method" "get_post_details" {
+  rest_api_id   = var.api_gateway_id
+  resource_id   = aws_api_gateway_resource.post_details.id
+  http_method   = "GET"
+  authorization = "NONE"
+}
+resource "aws_api_gateway_integration" "get_post_details" {
+  rest_api_id             = var.api_gateway_id
+  resource_id             = aws_api_gateway_resource.post_details.id
+  http_method             = aws_api_gateway_method.get_post_details.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.get_post_details.invoke_arn
+}
+resource "aws_lambda_permission" "get_post_details" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.get_post_details.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${var.api_gateway_execution_arn}/*/${aws_api_gateway_method.get_post_details.http_method}${aws_api_gateway_resource.post_details.path}"
+}
+data "archive_file" "get_post_details" {
+  type = "zip"
+  source_file = "${var.get_post_details_path}/${var.get_post_details_file_name}.js"
+  output_path = "${var.get_post_details_path}/${var.get_post_details_file_name}.zip"
+}
+resource "aws_lambda_function" "get_post_details" {
+  filename         = "${var.get_post_details_path}/${var.get_post_details_file_name}.zip"
+  function_name    = var.get_post_details_file_name
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "${var.get_post_details_file_name}.handler"
+  source_code_hash = filebase64sha256("${var.get_post_details_path}/${var.get_post_details_file_name}.zip")
+  runtime          = "nodejs12.x"
+  timeout          = 10
+  layers           = [ var.node_layer_arn ]
+  description      = "GET a post's details through the REST API"
+  environment {
+    variables = {
+      TABLE_NAME = var.table_name
+    }
+  }
+  tags = {
+    Name = var.developer
+  }
+  depends_on = [
+    data.archive_file.get_post_details, 
+  ]
 }
