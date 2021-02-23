@@ -1,5 +1,5 @@
 const {
-  parseDate, ZeroPadNumber, variableToItemAttribute
+  parseDate, isUsername, variableToItemAttribute
 } = require( `./utils` )
 
 class Comment {
@@ -8,18 +8,27 @@ class Comment {
    * @param {Object} details The details of the project.
    */
   constructor( {
-    userNumber, userCommentNumber, userName, slug, text,
-    vote = `0`, numberVotes = `0`, dateAdded = new Date(), replyChain = []
+    username, 
+    userCommentNumber, 
+    name, 
+    slug, 
+    text, 
+    vote = `0`, 
+    numberVotes = `0`, 
+    dateAdded = new Date(), 
+    replyChain = []
   } ) {
-    if ( typeof userNumber === `undefined` )
-      throw new Error( `Must give user's number` )
-    this.userNumber = parseInt( userNumber )
+    if ( typeof username === `undefined` )
+      throw Error( `Must give the user's username` )
+    if ( !isUsername( username ) )
+      throw Error( `Username must be formatted as UUID` )
+    this.username = username
     if ( typeof userCommentNumber === `undefined` )
       throw new Error( `Must give the number of comments the user has made.` )
     this.userCommentNumber = parseInt( userCommentNumber )
-    if ( typeof userName === `undefined` )
+    if ( typeof name === `undefined` )
       throw Error( `Must give the user's name.` )
-    this.userName = userName
+    this.name = name
     if ( typeof slug === `undefined` )
       throw new Error( `Must give post's slug` )
     this.slug = slug
@@ -51,7 +60,7 @@ class Comment {
    */
   pk() {
     return variableToItemAttribute(
-      `USER#${ ZeroPadNumber( this.userNumber ) }`
+      `USER#${ this.username }`
     )
   }
 
@@ -61,7 +70,7 @@ class Comment {
   key() {
     return {
       'PK': variableToItemAttribute(
-        `USER#${ ZeroPadNumber( this.userNumber ) }`
+        `USER#${ this.username }`
       ),
       'SK': variableToItemAttribute(
         `#COMMENT#${ this.dateAdded.toISOString() }`
@@ -104,7 +113,7 @@ class Comment {
       ...this.key(),
       ...this.gsi1(),
       'Type': variableToItemAttribute( `comment` ),
-      'User': variableToItemAttribute( this.userName ),
+      'Name': variableToItemAttribute( this.name ),
       'Text': variableToItemAttribute( this.text ),
       'Vote': variableToItemAttribute( this.vote ),
       'NumberVotes': variableToItemAttribute( this.numberVotes ),
@@ -127,9 +136,9 @@ const commentFromItem = ( item ) => {
     ( date ) => date.split( `#` )[2]
   )
   return new Comment ( {
-    userNumber: parseInt( item.PK.S.split( `#` )[1] ).toString(),
+    username: item.PK.S.split( `#` )[1],
     userCommentNumber: parseInt( item.UserCommentNumber.N ).toString(),
-    userName: item.User.S,
+    name: item.Name.S,
     slug: item.Slug.S,
     text: item.Text.S,
     vote: parseInt( item.Vote.N ).toString(),

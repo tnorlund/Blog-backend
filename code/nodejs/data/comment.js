@@ -37,12 +37,15 @@ const addComment = async ( tableName, user, post, text, replyChain ) => {
   const vote_response = await incrementNumberUserVotes( tableName, user )
   if ( vote_response.error ) return vote_response
   let comment, vote
-  // Create the comment and vote.
+  /** 
+   * The comment and votes does not have a reply chain when the comment is not 
+   * a reply.
+   */
   if ( typeof replyChain == `undefined` ) {
     comment = new Comment( {
-      userNumber: user_response.user.userNumber,
+      username: user_response.user.username,
       userCommentNumber: user_response.user.numberComments,
-      userName: user_response.user.name,
+      name: user_response.user.name,
       slug: post_response.post.slug,
       postCommentNumber: post_response.post.numberComments,
       text,
@@ -50,8 +53,8 @@ const addComment = async ( tableName, user, post, text, replyChain ) => {
       numberVotes: 1
     } )
     vote = new Vote( {
-      userNumber: user_response.user.userNumber,
-      userName: user_response.user.name,
+      username: user_response.user.username,
+      name: user_response.user.name,
       slug: post_response.post.slug,
       replyChain: [ comment.dateAdded.toISOString() ],
       commentDate: comment.dateAdded.dateAdded,
@@ -60,9 +63,9 @@ const addComment = async ( tableName, user, post, text, replyChain ) => {
     } )
   } else {
     comment = new Comment( {
-      userNumber: user_response.user.userNumber,
+      username: user_response.user.username,
       userCommentNumber: user_response.user.numberComments,
-      userName: user_response.user.name,
+      name: user_response.user.name,
       slug: post_response.post.slug,
       postCommentNumber: post_response.post.numberComments,
       vote: 1,
@@ -71,8 +74,8 @@ const addComment = async ( tableName, user, post, text, replyChain ) => {
       replyChain: replyChain
     } )
     vote = new Vote( {
-      userNumber: user_response.user.userNumber,
-      userName: user_response.user.name,
+      username: user_response.user.username,
+      name: user_response.user.name,
       slug: post_response.post.slug,
       replyChain: [ ...replyChain, comment.dateAdded.toISOString() ],
       up: true,
@@ -148,7 +151,6 @@ const removeComment = async ( tableName, comment ) => {
   aggregate_data[`vote`] = []
   aggregate_data[`comment`] = []
   aggregate_data[`user`] = {}
-  // console.log( `comment_to_delete`, comment_to_delete )
   aggregate_data = aggregateData( comment_to_delete, aggregate_data )
   const transact_items = aggregateDataToTransact( aggregate_data, tableName )
   // Decrement the number of comments the post has

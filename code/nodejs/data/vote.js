@@ -25,8 +25,8 @@ const addVote = async ( tableName, user, post, comment, up ) => {
   const response = await incrementNumberCommentVotes( tableName, comment )
   if ( response.error ) return response
   const vote = new Vote( {
-    userNumber: user.userNumber,
-    userName: user.name,
+    username: user.username,
+    name: user.name,
     slug: post.slug,
     replyChain: response.comment.replyChain.concat( [
       response.comment.dateAdded
@@ -103,7 +103,8 @@ const removeVote = async ( tableName, comment, vote ) => {
     { Update: {
       TableName: tableName,
       Key: new User( {
-        name: `someone`, email: `something`, userNumber: vote.userNumber
+        name: `someone`, email: `something`, username: vote.username
+        // name: `someone`, email: `something`, userNumber: vote.userNumber
       } ).key(),
       ConditionExpression: `attribute_exists(PK)`,
       UpdateExpression: `SET #count = #count - :dec`,

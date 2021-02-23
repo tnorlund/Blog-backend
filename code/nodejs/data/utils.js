@@ -28,26 +28,26 @@ const aggregateData = ( comment, data ) => {
   // Get the number of votes each user has made on this comment
   Object.values( comment.votes ).forEach( 
     ( vote ) => {
-      if ( data.user[ vote.userNumber ] ) {
-        if ( data.user[ vote.userNumber ][ `vote` ] )
-          data.user[ vote.userNumber ].vote += 1
-        else data.user[ vote.userNumber ].vote = 1
+      if ( data.user[ vote.username ] ) {
+        if ( data.user[ vote.username ][ `vote` ] )
+          data.user[ vote.username ].vote += 1
+        else data.user[ vote.username ].vote = 1
       } else {
-        data.user[ vote.userNumber ] = {}
-        data.user[ vote.userNumber ][`vote`] = 1
+        data.user[ vote.username ] = {}
+        data.user[ vote.username ][`vote`] = 1
       }
       data[`vote`].push( vote.key() )
     } 
   )
   // Add the comment data
-  if ( data.user[ comment.userNumber ] ) {
-    if ( data.user[ comment.userNumber ][ `comment` ] )
-      data.user[ comment.userNumber ].comment += 1
+  if ( data.user[ comment.username ] ) {
+    if ( data.user[ comment.username ][ `comment` ] )
+      data.user[ comment.username ].comment += 1
     else
-      data.user[ comment.userNumber ].comment = 1
+      data.user[ comment.username ].comment = 1
   } else {
-    data.user[ comment.userNumber ] = {}
-    data.user[ comment.userNumber ][ `comment` ] = 1
+    data.user[ comment.username ] = {}
+    data.user[ comment.username ][ `comment` ] = 1
   }
   data[`comment`].push( comment.key() )
   return data
@@ -79,14 +79,14 @@ const aggregateDataToTransact = ( data, tableName ) => {
   // Update each user have less than the number of votes and comments found in
   // the aggregate data.
   Object.entries( data.user ).forEach( 
-    ( [ userNumber, userDetails ] ) => {
+    ( [ username, userDetails ] ) => {
       transact_items.push( {
         Update: {
           TableName: tableName,
           Key: new User( {
             name: `someone`,
             email: `something`,
-            userNumber: userNumber
+            username
           } ).key(),
           ConditionExpression: `attribute_exists(PK)`,
           UpdateExpression: 

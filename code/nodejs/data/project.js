@@ -164,9 +164,9 @@ const removeProject = async ( tableName, project ) => {
       return { Update: {
         TableName: tableName,
         Key: new User( {
-          name: projectFollow.userName,
+          name: projectFollow.name,
           email: projectFollow.email,
-          userNumber: projectFollow.userNumber
+          username: projectFollow.username
         } ).key(),
         ConditionExpression: `attribute_exists(PK)`,
         UpdateExpression: `SET #count = #count - :dec`,

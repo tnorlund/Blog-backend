@@ -1,5 +1,5 @@
 const {
-  ZeroPadNumber, parseDate, variableToItemAttribute
+  isUsername, parseDate, variableToItemAttribute
 } = require( `./utils` )
 
 class TOS {
@@ -7,10 +7,12 @@ class TOS {
    * A Terms of Service object.
    * @param {Object} details The details of the Terms of Service.
    */
-  constructor( { userNumber, version, dateAccepted = new Date() } ) {
-    if ( typeof userNumber === `undefined` )
-      throw Error( `Must give user's number` )
-    this.userNumber = parseInt( userNumber )
+  constructor( { username, version, dateAccepted = new Date() } ) {
+    if ( typeof username === `undefined` )
+      throw Error( `Must give the user's username` )
+      if ( !isUsername( username ) )
+      throw Error( `Username must be formatted as UUID` )
+    this.username = username
     if ( typeof version === `undefined` )
       throw Error( `Must give terms of service's version` )
     this.version = ( typeof version == `string` ) ?
@@ -24,7 +26,7 @@ class TOS {
    */
   pk() {
     return variableToItemAttribute(
-      `USER#${ ZeroPadNumber( this.userNumber ) }`
+      `USER#${ this.username }`
     )
   }
 
@@ -34,7 +36,7 @@ class TOS {
   key() {
     return {
       'PK': variableToItemAttribute(
-        `USER#${ ZeroPadNumber( this.userNumber ) }`
+        `USER#${ this.username }`
       ),
       'SK': variableToItemAttribute(
         `#TOS#${ this.version.toISOString() }`
@@ -61,7 +63,7 @@ class TOS {
  */
 const tosFromItem = ( item ) => {
   return new TOS( {
-    userNumber: item.PK.S.split( `#` )[1],
+    username: item.PK.S.split( `#` )[1],
     version: parseDate( item.SK.S.split( `#` )[2] ),
     dateAccepted: parseDate( item.DateAccepted.S )
   } )

@@ -1,5 +1,5 @@
 const { 
-  ZeroPadNumber, parseDate, variableToItemAttribute 
+  parseDate, variableToItemAttribute, isUsername
 } = require( `./utils` )
 /**
  * User library
@@ -12,7 +12,7 @@ class User {
    * @param {Number|String} [options.userNumber=`0`] The number of the user.
    */
   constructor( {
-    name, email, userNumber = `0`, dateJoined = new Date(),
+    name, email, username, dateJoined = new Date(),
     numberFollows = `0`, numberComments = `0`, numberVotes = `0`,
     totalKarma = `0`
   } ) {
@@ -21,11 +21,11 @@ class User {
     if ( typeof email === `undefined` ) 
       throw Error( `Must give the user's email` )
     this.email = email
-    if ( isNaN( userNumber ) )
-      throw new Error( `User number must be a number` )
-    if ( parseInt( userNumber ) < 0 )
-      throw new Error( `User number must be positive` )
-    this.userNumber = parseInt( userNumber )
+    if ( typeof username === `undefined` )
+      throw Error( `Must give the user's username` )
+    if ( !isUsername( username ) )
+      throw Error( `Username must be formatted as UUID` )
+    this.username = username
     this.dateJoined = (
       ( typeof dateJoined == `string` ) ? parseDate( dateJoined ): dateJoined
     )
@@ -54,7 +54,7 @@ class User {
    */
   pk() {
     return variableToItemAttribute(
-      `USER#${ ZeroPadNumber( this.userNumber ) }`
+      `USER#${ this.username }`
     )
   }
 
@@ -64,7 +64,7 @@ class User {
   key() {
     return {
       'PK':variableToItemAttribute(
-        `USER#${ ZeroPadNumber( this.userNumber ) }`
+        `USER#${ this.username }`
       ),
       'SK': variableToItemAttribute( `#USER` )
     }
@@ -97,7 +97,7 @@ const userFromItem = ( item ) => {
   return new User( {
     name: item.Name.S,
     email: item.Email.S,
-    userNumber: item.PK.S.split( `#` )[1],
+    username: item.PK.S.split( `#` )[1],
     dateJoined: item.DateJoined.S,
     numberComments: item.NumberComments.N,
     numberVotes: item.NumberVotes.N,

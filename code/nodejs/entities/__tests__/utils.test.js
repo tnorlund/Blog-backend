@@ -1,4 +1,11 @@
-const { ZeroPadNumber, parseDate, isIP, variableToItemAttribute, mappingToObject } = require( `../utils` )
+const {
+  isIP,
+  isUsername,
+  mappingToObject,
+  parseDate,
+  variableToItemAttribute,
+  ZeroPadNumber,
+} = require( `../utils` )
 
 describe( `utility functions`, () => {
   describe( `zeroPadNumber`, () => {
@@ -23,15 +30,49 @@ describe( `utility functions`, () => {
     test( `invalid parameter`, () => expect( () => isIP( {} ) ).toThrow() )
   } )
 
+  describe( `isUsername`, () => {
+    test( `valid parameter`, () => expect(
+      isUsername( `4ec5a264-733d-4ee5-b59c-7911539e3942` )
+    ).toEqual( true ) )
+    test( `valid parameter`, () => expect(
+      isUsername( `something` )
+    ).toEqual( false ) )
+    test( `invalid parameter`, () => expect(
+      () => isUsername( {} )
+    ).toThrow() )
+  } )
+
   describe( `variableToItemAttribute`, () => {
-    test( `string`, () => expect( variableToItemAttribute( `something` ) ).toEqual( { 'S': `something` } ) )
-    test( `empty string`, () => expect( variableToItemAttribute( `` ) ).toEqual( { 'NULL': true } ) )
-    test( `none string`, () => expect( variableToItemAttribute( `None` ) ).toEqual( { 'NULL': true } ) )
-    test( `boolean`, () => expect( variableToItemAttribute( true ) ).toEqual( { 'BOOL': true } ) )
-    test( `number array`, () => expect( variableToItemAttribute( [ 1, 2, 3 ] ) ).toEqual( { 'NS': [ `1`, `2`, `3` ] } ) )
-    test( `number array`, () => expect( variableToItemAttribute( [ `1`, `2`, `3` ] ) ).toEqual( { 'NS': [ `1`, `2`, `3` ] } ) )
-    test( `string array`, () => expect( variableToItemAttribute( [ `something`, `something`, `something` ] ) ).toEqual( { 'SS': [ `something`, `something`, `something` ] } ) )
-    test( `map`, () => expect( variableToItemAttribute( { 'First': 1, 'Second': `something`} ) ).toEqual( { 'M': { 'First': { 'N': `1` }, 'Second': { 'S': `something` } } } ) )
+    const date = new Date()
+    test( `string`, () => expect(
+      variableToItemAttribute( `something` )
+    ).toEqual( { 'S': `something` } ) )
+    test( `string`, () => expect(
+      variableToItemAttribute( date )
+    ).toEqual( { 'S': date.toISOString() } ) )
+    test( `empty string`, () => expect(
+      variableToItemAttribute( `` )
+    ).toEqual( { 'NULL': true } ) )
+    test( `none string`, () => expect(
+      variableToItemAttribute( `None` )
+    ).toEqual( { 'NULL': true } ) )
+    test( `boolean`, () => expect(
+      variableToItemAttribute( true )
+    ).toEqual( { 'BOOL': true } ) )
+    test( `number array`, () => expect(
+      variableToItemAttribute( [ 1, 2, 3 ] )
+    ).toEqual( { 'NS': [ `1`, `2`, `3` ] } ) )
+    test( `number array`, () => expect(
+      variableToItemAttribute( [ `1`, `2`, `3` ] )
+    ).toEqual( { 'NS': [ `1`, `2`, `3` ] } ) )
+    test( `string array`, () => expect(
+      variableToItemAttribute( [ `something`, `something`, `something` ] )
+    ).toEqual( { 'SS': [ `something`, `something`, `something` ] } ) )
+    test( `map`, () => expect(
+      variableToItemAttribute( { 'First': 1, 'Second': `something`} )
+    ).toEqual( {
+      'M': { 'First': { 'N': `1` }, 'Second': { 'S': `something` } }
+    } ) )
   } )
 
   describe( `mappingToObject`, () => {

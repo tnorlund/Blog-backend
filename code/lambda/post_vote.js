@@ -1,4 +1,4 @@
-const { User, Comment, addVote } = require( `/opt/nodejs/index` )
+const { User, Post, Comment, addVote } = require( `/opt/nodejs/index` )
 
 /**
  * Getting the basic blog details.
@@ -16,7 +16,7 @@ exports.handler = async ( event, context ) => {
     isBase64Encoded: false
   }
   try {
-    parsedBody = JSON.parse( event.body )
+    const parsedBody = JSON.parse( event.body )
   } catch( error ) {
     return {
       statusCode: 500,
@@ -33,6 +33,7 @@ exports.handler = async ( event, context ) => {
     typeof parsedBody.email == `undefined` ||
     typeof parsedBody.userNumber == `undefined` ||
     typeof parsedBody.slug == `undefined` ||
+    typeof parsedBody.title == `undefined` ||
     typeof parsedBody.commentUserNumber == `undefined` ||
     typeof parsedBody.up == `undefined` ||
     typeof parsedBody.replyChain == `undefined`
@@ -50,6 +51,10 @@ exports.handler = async ( event, context ) => {
       email: parsedBody.email,
       userNumber: parsedBody.userNumber
     } ),
+    new Post( {
+      slug: parsedBody.slug,
+      title: parsedBody.title
+    } ),
     new Comment( {
       userNumber: commentUserNumber,
       userCommentNumber: `0`,
@@ -61,7 +66,8 @@ exports.handler = async ( event, context ) => {
       dateAdded: parsedBody.replyChain[
         parsedBody.replyChain.length - 1
       ]
-    } )
+    } ),
+    parsedBody.up
   )
   if ( error ) return {
     statusCode: 500,

@@ -29,8 +29,8 @@ const addProjectFollow = async ( tableName, user, project ) => {
     if ( user_response.error ) return { error: user_response.error }
     // Add the project's follow to the DB.
     const projectFollow = new ProjectFollow( {
-      userName: user_response.user.name, 
-      userNumber: user_response.user.userNumber,
+      username: user_response.user.username, 
+      name: user_response.user.name,
       userFollowNumber: user_response.user.numberFollows, 
       email: user_response.user.email, 
       slug: project_response.project.slug,
@@ -71,8 +71,8 @@ const removeProjectFollow = async ( tableName, user, project ) => {
     if ( user_response.error ) return { error: user_response.error }
     // Delete the project's follow to the DB.
     const projectFollow = new ProjectFollow( {
-      userName: user_response.user.name, 
-      userNumber: user_response.user.userNumber,
+      username: user_response.user.username, 
+      name: user_response.user.name,
       userFollowNumber: user_response.user.numberFollows, 
       email: user_response.user.email, 
       slug: project_response.project.slug,

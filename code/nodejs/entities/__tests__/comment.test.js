@@ -1,32 +1,75 @@
 const { Comment, commentFromItem } = require( `..` )
 const { ZeroPadNumber } = require( `../utils` )
 
-const userNumber = 1
+const username = `4ec5a264-733d-4ee5-b59c-7911539e3942`
 const userCommentNumber = 1
-const userName = `Johnny Appleseed`
+const name = `Johnny Appleseed`
 const slug = `/`
 const text = `This is the comment text`
 const dateAdded = new Date()
 const baseCommentDate = new Date()
 
 const validComments = [
-  { userNumber, userCommentNumber, userName, slug, text, dateAdded },
-  { userNumber, userCommentNumber, userName, slug, text, vote: `0`, dateAdded },
-  { userNumber, userCommentNumber, userName, slug, text, vote: `0`, dateAdded },
-  { userNumber, userCommentNumber, userName, slug, text, vote: `0`, numberVotes: `0`, dateAdded },
-  { userNumber, userCommentNumber, userName, slug, text, vote: `0`, numberVotes: `0`, dateAdded, replyChain:[baseCommentDate] },
+  { username, userCommentNumber, name, slug, text, dateAdded },
+  { username, userCommentNumber, name, slug, text, vote: `0`, dateAdded },
+  { username, userCommentNumber, name, slug, text, vote: `0`, dateAdded },
+  { 
+    username, 
+    userCommentNumber, 
+    name, 
+    slug, 
+    text, 
+    vote: `0`, 
+    numberVotes: `0`, 
+    dateAdded 
+  },
+  { 
+    username, 
+    userCommentNumber, 
+    name, 
+    slug, 
+    text, 
+    vote: `0`, 
+    numberVotes: `0`, 
+    dateAdded, 
+    replyChain:[baseCommentDate] 
+  },
 ]
 
 const invalidComments = [
-  { userCommentNumber, userName, slug, text, dateAdded },
-  { userNumber, userName, slug, text, dateAdded },
-  { userNumber, userCommentNumber, slug, text, dateAdded },
-  { userNumber, userCommentNumber, userName, text, dateAdded },
-  { userNumber, userCommentNumber, userName, slug, dateAdded },
-  { userNumber, userCommentNumber, userName, slug, text, numberVotes: `-1`, dateAdded },
-  { userNumber, userCommentNumber, userName, slug, text, dateAdded, replyChain:`none` },
-  { userNumber, userCommentNumber, userName, slug, text, dateAdded, replyChain:[`none`] },
-  { userNumber, userCommentNumber, userName, slug, text, dateAdded, replyChain:[0] }
+  { userCommentNumber, name, slug, text, dateAdded },
+  { username, name, slug, text, dateAdded },
+  { username, userCommentNumber, slug, text, dateAdded },
+  { username, userCommentNumber, name, text, dateAdded },
+  { username, userCommentNumber, name, slug, dateAdded },
+  { 
+    username, 
+    userCommentNumber, 
+    name, 
+    slug, 
+    text, 
+    numberVotes: `-1`, 
+    dateAdded 
+  },
+  { 
+    username, 
+    userCommentNumber, 
+    name, 
+    slug, 
+    text, 
+    dateAdded, 
+    replyChain:`none` 
+  },
+  { 
+    username, 
+    userCommentNumber, 
+    name, 
+    slug, 
+    text, 
+    dateAdded, 
+    replyChain:[`none`] 
+  },
+  { username, userCommentNumber, name, slug, text, dateAdded, replyChain:[0] }
 ]
 
 describe( `comment object`, () => {
@@ -34,9 +77,9 @@ describe( `comment object`, () => {
     `valid constructor`,
     parameter => {
       const comment = new Comment( parameter )
-      expect( comment.userNumber ).toEqual( userNumber )
+      expect( comment.username ).toEqual( username )
       expect( comment.userCommentNumber ).toEqual( userCommentNumber )
-      expect( comment.userName ).toEqual( userName )
+      expect( comment.name ).toEqual( name )
       expect( comment.slug ).toEqual( slug )
       expect( comment.text ).toEqual( text )
       expect( comment.vote ).toEqual( 0 )
@@ -47,10 +90,12 @@ describe( `comment object`, () => {
   
   test( `valid constructor`, 
     () => {
-      const comment = new Comment( { userNumber, userCommentNumber, userName, slug, text } ) 
-      expect( comment.userNumber ).toEqual( userNumber )
+      const comment = new Comment( { 
+        username, userCommentNumber, name, slug, text 
+      } ) 
+      expect( comment.username ).toEqual( username )
       expect( comment.userCommentNumber ).toEqual( userCommentNumber )
-      expect( comment.userName ).toEqual( userName )
+      expect( comment.name ).toEqual( name )
       expect( comment.slug ).toEqual( slug )
       expect( comment.text ).toEqual( text )
       expect( comment.vote ).toEqual( 0 )
@@ -65,24 +110,24 @@ describe( `comment object`, () => {
   
   test( `pk`, () => { 
     expect( new Comment( {
-      userNumber, userCommentNumber, userName, slug, text, dateAdded
+      username, userCommentNumber, name, slug, text, dateAdded
     } ).pk() ).toEqual( {
-      'S': `USER#${ ZeroPadNumber( userNumber ) }`
+      'S': `USER#${ username }`
     } )
   } )
   
   test( `key`, () => { 
     expect( new Comment( {
-      userNumber, userCommentNumber, userName, slug, text, dateAdded
+      username, userCommentNumber, name, slug, text, dateAdded
     } ).key() ).toEqual( {
-      'PK': { 'S': `USER#${ ZeroPadNumber( userNumber ) }` },
+      'PK': { 'S': `USER#${ username }` },
       'SK': { 'S': `#COMMENT#${ dateAdded.toISOString() }` }
     } )
   } )
   
   test( `gsi1pk`, () => { 
     expect( new Comment( {
-      userNumber, userCommentNumber, userName, slug, text, dateAdded
+      username, userCommentNumber, name, slug, text, dateAdded
     } ).gsi1pk() ).toEqual( {
       'S': `POST#${ slug }`
     } )
@@ -90,34 +135,58 @@ describe( `comment object`, () => {
   
   test( `gsi1`,  () => { 
     expect( new Comment( {
-      userNumber, userCommentNumber, userName, slug, text, dateAdded
+      username, userCommentNumber, name, slug, text, dateAdded
     } ).gsi1() ).toEqual( {
       'GSI1PK': { 'S': `POST#${ slug }` },
       'GSI1SK': { 'S': `#COMMENT#${ dateAdded.toISOString() }` }
     } )
     expect( new Comment( {
-      userNumber, userCommentNumber, userName, slug, text, dateAdded, replyChain: [baseCommentDate]
+      username, 
+      userCommentNumber, 
+      name, 
+      slug, 
+      text, 
+      dateAdded, 
+      replyChain: [baseCommentDate]
     } ).gsi1() ).toEqual( {
       'GSI1PK': { 'S': `POST#${ slug }` },
-      'GSI1SK': { 'S': `#COMMENT#${ dateAdded.toISOString() }#COMMENT#${ baseCommentDate.toISOString() }` }
+      'GSI1SK': { 
+        'S': `#COMMENT#${ 
+          dateAdded.toISOString() 
+        }#COMMENT#${ 
+          baseCommentDate.toISOString() 
+        }` 
+      }
     } )
     expect( new Comment( {
-      userNumber, userCommentNumber, userName, slug, text, dateAdded, replyChain: [baseCommentDate.toISOString()]
+      username, 
+      userCommentNumber, 
+      name, 
+      slug, 
+      text, 
+      dateAdded, 
+      replyChain: [baseCommentDate.toISOString()]
     } ).gsi1() ).toEqual( {
       'GSI1PK': { 'S': `POST#${ slug }` },
-      'GSI1SK': { 'S': `#COMMENT#${ dateAdded.toISOString() }#COMMENT#${ baseCommentDate.toISOString() }` }
+      'GSI1SK': { 
+        'S': `#COMMENT#${ 
+          dateAdded.toISOString() 
+        }#COMMENT#${ baseCommentDate.toISOString() }` 
+      }
     } )
   } )
   
   test( `toItem`, () => {
-    const comment = new Comment( { userNumber, userCommentNumber, userName, slug, text, dateAdded } )
+    const comment = new Comment( { 
+      username, userCommentNumber, name, slug, text, dateAdded 
+    } )
     expect( comment.toItem() ).toStrictEqual( {
-      'PK': { 'S': `USER#${ ZeroPadNumber( userNumber ) }` },
+      'PK': { 'S': `USER#${ username }` },
       'SK': { 'S': `#COMMENT#${ dateAdded.toISOString() }` },
       'GSI1PK': { 'S': `POST#${ slug }` },
       'GSI1SK': { 'S': `#COMMENT#${ dateAdded.toISOString() }` },
       'Type': { 'S': `comment` },
-      'User': { 'S': userName },
+      'Name': { 'S': name },
       'Text': { 'S': text },
       'Vote': { 'N':`0` },
       'NumberVotes': { 'N': `0` },
@@ -128,7 +197,9 @@ describe( `comment object`, () => {
   } )
   
   test( `commentFromItem`, () => {
-    const comment = new Comment( { userNumber, userCommentNumber, userName, slug, text, dateAdded } )
+    const comment = new Comment( { 
+      username, userCommentNumber, name, slug, text, dateAdded 
+    } )
     expect( commentFromItem( comment.toItem() ) ).toStrictEqual( comment )
   } )
 } )

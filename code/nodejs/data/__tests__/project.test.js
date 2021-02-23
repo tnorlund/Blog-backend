@@ -5,18 +5,25 @@ const {
 } = require( `..` )
 const { Blog, User, Project, ProjectFollow } = require( `../../entities` )
 
+const name = `Tyler`
+const email = `someone@me.com`
+const username = `4ec5a264-733d-4ee5-b59c-7911539e3942`
+const slug = `/`
+const title = `Tyler Norlund`
+
+const blog = new Blog( {} )
+const user = new User( { name, email, username } )
+const project = new Project( { slug, title } )
+
+
 describe( `addProject`, () => {
   test( `A project can be added to the table`, async () => {
-    let blog = new Blog( {} )
-    const project = new Project( { slug: `/`, title: `Tyler Norlund` } )
     await addBlog( `test-table`, blog )
     const result = await addProject( `test-table`, project )
     expect( result ).toEqual( { project } )
   } )
 
   test( `Returns an error when the project is in the table`, async () => {
-    let blog = new Blog( {} )
-    const project = new Project( { slug: `/`, title: `Tyler Norlund` } )
     await addBlog( `test-table`, blog )
     await addProject( `test-table`, project )
     const result = await addProject( `test-table`, project )
@@ -26,8 +33,6 @@ describe( `addProject`, () => {
   } )
 
   test( `Returns error when the table does not exist`, async () => {
-    let blog = new Blog( {} )
-    const project = new Project( { slug: `/`, title: `Tyler Norlund` } )
     await addBlog( `test-table`, blog )
     const result = await addProject( `table-not-exist`, project )
     expect( result ).toEqual( { 'error': `Table does not exist` } )
@@ -48,8 +53,6 @@ describe( `addProject`, () => {
 
 describe( `getProject`, () => {
   test( `A project can be queried from to the table`, async () => {
-    let blog = new Blog( {} )
-    const project = new Project( { slug: `/`, title: `Tyler Norlund` } )
     await addBlog( `test-table`, blog )
     await addProject( `test-table`, project )
     const result = await getProject( `test-table`, project )
@@ -57,13 +60,11 @@ describe( `getProject`, () => {
   } )
 
   test( `Returns error when no project is in the table`, async () => {
-    const project = new Project( { slug: `/`, title: `Tyler Norlund` } )
     const result = await getProject( `test-table`, project )
     expect( result ).toEqual( { 'error': `Project does not exist` } )
   } )
 
   test( `Returns error when the table does not exist`, async () => {
-    const project = new Project( { slug: `/`, title: `Tyler Norlund` } )
     const result = await getProject( `not-a-table`, project )
     expect( result ).toEqual( { 'error': `Table does not exist` } )
   } )
@@ -83,14 +84,8 @@ describe( `getProject`, () => {
 
 describe( `getProjectDetails`, () => {
   test( `A project's details can be queried from to the table`, async () => {
-    const blog = new Blog( {} )
-    const user = new User( {
-      name: `Tyler`, email: `me@me.com`
-    } )
-    let project = new Project( { slug: `/`, title: `Tyler Norlund` } )
     const projectFollow = new ProjectFollow( {
-      userName: `Tyler`, userNumber: 1, userFollowNumber: 1, email: `me@me.com`,
-      slug: `/`, title: `Tyler Norlund`, projectFollowNumber: 1
+      username, name, email, slug, title
     } )
     await addBlog( `test-table`, blog )
     const user_response = await addUser( `test-table`, user )
@@ -104,16 +99,15 @@ describe( `getProjectDetails`, () => {
     expect( { 
       ...result.followers[0], dateFollowed: undefined 
     } ).toEqual( { ...projectFollow, dateFollowed: undefined } )
+    project.numberFollows -= 1
   } )
 
   test( `Returns error when no project is in the table`, async () => {
-    const project = new Project( { slug: `/`, title: `Tyler Norlund` } )
     const result = await getProjectDetails( `test-table`, project )
     expect( result ).toEqual( { 'error': `Project does not exist` } )
   } )
 
   test( `Returns error when the table does not exist`, async () => {
-    const project = new Project( { slug: `/`, title: `Tyler Norlund` } )
     const result = await getProjectDetails( `not-a-table`, project )
     expect( result ).toEqual( { 'error': `Table does not exist` } )
   } )
@@ -133,23 +127,21 @@ describe( `getProjectDetails`, () => {
 
 describe( `updateProject`, () => {
   test( `A project can be updated from to the table`, async () => {
-    let blog = new Blog( {} )
-    let project = new Project( { slug: `/`, title: `Tyler Norlund` } )
     await addBlog( `test-table`, blog )
     await addProject( `test-table`, project )
-    project = new Project( { slug: `/`, title: `A Ne Title` } )
-    const result = await updateProject( `test-table`, project )
-    expect( result ).toEqual( { project } )
+    let new_project = new Project( { 
+      slug, title: `A New Title` 
+    } )
+    const result = await updateProject( `test-table`, new_project )
+    expect( result ).toEqual( { project: new_project } )
   } )
 
   test( `Returns error when no project is in the table`, async () => {
-    const project = new Project( { slug: `/`, title: `Tyler Norlund` } )
     const result = await updateProject( `test-table`, project )
     expect( result ).toEqual( { 'error': `Project does not exist` } )
   } )
 
   test( `Returns error when the table does not exist`, async () => {
-    const project = new Project( { slug: `/`, title: `Tyler Norlund` } )
     const result = await updateProject( `not-a-table`, project )
     expect( result ).toEqual( { 'error': `Table does not exist` } )
   } )
@@ -169,32 +161,39 @@ describe( `updateProject`, () => {
 
 describe( `removeProject`, () => {
   test( `A project and followers can be removed from the table`, async () => {
-    let blog = new Blog( {} )
-    let project = new Project( { slug: `/`, title: `Tyler Norlund` } )
-    const user_a = new User( { name: `Tyler`, email: `me@me.com` } )
-    const user_b = new User( { name: `Joe`, email: `joe@me.com` } )
-    const projectFollow_a = new ProjectFollow( {
-      userName: `Tyler`, userNumber: 1, userFollowNumber: 1, email: `me@me.com`,
-      slug: `/`, title: `Tyler Norlund`, projectFollowNumber: 1
+    const secondary_user_name = `Joe`
+    const secondary_user_email = `joe@me.com`
+    const secondary_user_username = `11bf5b37-e0b8-42e0-8dcf-dc8c4aefc000`
+    const secondary_user = new User( {
+      name: secondary_user_name, 
+      email: secondary_user_email, 
+      username: secondary_user_username
     } )
-    const projectFollow_b = new ProjectFollow( {
-      userName: `Joe`, userNumber: 2, userFollowNumber: 2, email: `joe@me.com`,
-      slug: `/`, title: `Tyler Norlund`, projectFollowNumber: 1
+    const projectFollow = new ProjectFollow( {
+      username, name, email, slug, title
+    } )
+    const secondary_projectFollow = new ProjectFollow( {
+      username: secondary_user_username,
+      name: secondary_user_name,
+      email: secondary_user_email,
+      slug, 
+      title
     } )
     await addBlog( `test-table`, blog )
     await addProject( `test-table`, project )
-    await addUser( `test-table`, user_a )
-    await addUser( `test-table`, user_b )
-    await addProjectFollow( `test-table`, user_a, project )
-    await addProjectFollow( `test-table`, user_b, project )
-    project.numberFollows = 2
+    await addUser( `test-table`, user )
+    await addUser( `test-table`, secondary_user )
+    await addProjectFollow( `test-table`, user, project )
+    project.numberFollows += 1
+    await addProjectFollow( `test-table`, secondary_user, project )
+    project.numberFollows += 1
     const result = await removeProject( `test-table`, project )
     expect( result.project ).toEqual( project )
     expect( { ...result.followers[0], dateFollowed: undefined } ).toEqual(
-      { ...projectFollow_a, dateFollowed: undefined }
+      { ...projectFollow, dateFollowed: undefined }
     )
     expect( { ...result.followers[1], dateFollowed: undefined } ).toEqual(
-      { ...projectFollow_b, dateFollowed: undefined }
+      { ...secondary_projectFollow, dateFollowed: undefined }
     )
   } )
 
@@ -225,8 +224,7 @@ describe( `removeProject`, () => {
 
 describe( `incrementNumberProjectFollows`, () => {
   test( `The number of follows the project has can be incremented`, async () => { 
-    let project = new Project( { slug: `/`, title: `Tyler Norlund` } )
-    await addBlog( `test-table`, new Blog( {} ) )
+    await addBlog( `test-table`, blog )
     let result = await addProject( `test-table`, project )
     result = await incrementNumberProjectFollows( `test-table`, result.project )
     project.numberFollows += 1
@@ -234,13 +232,11 @@ describe( `incrementNumberProjectFollows`, () => {
   } )
 
   test( `Returns error when no project is in the table`, async () => {
-    const project = new Project( { slug: `/`, title: `Tyler Norlund` } )
     const result = await incrementNumberProjectFollows( `test-table`, project )
     expect( result ).toEqual( { 'error': `Project does not exist` } )
   } )
 
   test( `Returns error when the table does not exist`, async () => {
-    const project = new Project( { slug: `/`, title: `Tyler Norlund` } )
     const result = await incrementNumberProjectFollows( `not-a-table`, project )
     expect( result ).toEqual( { 'error': `Table does not exist` } )
   } )
@@ -260,9 +256,6 @@ describe( `incrementNumberProjectFollows`, () => {
 
 describe( `decrementNumberProjectFollows`, () => {
   test( `The number of follows the project has can be decremented`, async () => { 
-    let project = new Project( {
-      slug: `/`, title: `Tyler Norlund`, numberFollows: 1
-    } )
     await addBlog( `test-table`, new Blog( {} ) )
     let result = await addProject( `test-table`, project )
     result = await decrementNumberProjectFollows( 
@@ -273,13 +266,11 @@ describe( `decrementNumberProjectFollows`, () => {
   } )
 
   test( `Returns error when no project is in the table`, async () => {
-    const project = new Project( { slug: `/`, title: `Tyler Norlund` } )
     const result = await decrementNumberProjectFollows( `test-table`, project )
     expect( result ).toEqual( { 'error': `Project does not exist` } )
   } )
 
   test( `Returns error when the table does not exist`, async () => {
-    const project = new Project( { slug: `/`, title: `Tyler Norlund` } )
     const result = await decrementNumberProjectFollows( `not-a-table`, project )
     expect( result ).toEqual( { 'error': `Table does not exist` } )
   } )

@@ -1,5 +1,5 @@
 const { 
-  ZeroPadNumber, parseDate, variableToItemAttribute
+  isUsername, parseDate, variableToItemAttribute
 } = require( `./utils` )
 class ProjectFollow {
   /**
@@ -7,14 +7,16 @@ class ProjectFollow {
    * @param {Object} details The details about the project's follow.
    */
   constructor( {
-    userName, userNumber, email, slug, title, dateFollowed = new Date()
+    username, name, email, slug, title, dateFollowed = new Date()
   } ) {
-    if ( typeof userName === `undefined` ) 
+    if ( typeof username === `undefined` )
+      throw Error( `Must give the user's username` )
+    if ( !isUsername( username ) )
+      throw Error( `Username must be formatted as UUID` )
+    this.username = username
+    if ( typeof name === `undefined` ) 
       throw Error( `Must give user's name` )
-    this.userName = userName
-    if ( typeof userNumber === `undefined` )
-      throw Error( `Must give the user's number` )
-    this.userNumber = parseInt( userNumber )
+    this.name = name
     if ( typeof email === `undefined` )
       throw Error( `Must give the user's email` )
     this.email = email
@@ -35,7 +37,7 @@ class ProjectFollow {
    */
   pk() {
     return variableToItemAttribute(
-      `USER#${ ZeroPadNumber( this.userNumber ) }`
+      `USER#${ this.username }`
     )
   }
 
@@ -45,7 +47,7 @@ class ProjectFollow {
   key() {
     return {
       'PK': variableToItemAttribute(
-        `USER#${ ZeroPadNumber( this.userNumber ) }`
+        `USER#${ this.username }`
       ),
       'SK': variableToItemAttribute( `#PROJECT#${ this.slug }` )
     }
@@ -78,7 +80,7 @@ class ProjectFollow {
       ...this.key(),
       ...this.gsi1(),
       'Type': { 'S': `project follow` },
-      'UserName': { 'S': this.userName },
+      'Name': { 'S': this.name },
       'Email': { 'S': this.email },
       'Title': { 'S': this.title },
       'DateFollowed': { 'S': this.dateFollowed.toISOString() }
@@ -93,8 +95,8 @@ class ProjectFollow {
  */
 const projectFollowFromItem = ( item ) => {
   return new ProjectFollow( {
-    userName: item.UserName.S,
-    userNumber: parseInt( item.PK.S.split( `#` )[1] ).toString(),
+    username: item.PK.S.split( `#` )[1],
+    name: item.Name.S,
     slug: item.GSI1PK.S.split( `#` )[1],
     email: item.Email.S,
     title: item.Title.S,

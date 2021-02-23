@@ -4,28 +4,31 @@ const {
 } = require( `..` )
 const { Blog, User, TOS } = require( `../../entities` )
 
+const name = `Tyler`
+const email = `someone@me.com`
+const username = `4ec5a264-733d-4ee5-b59c-7911539e3942`
+
+const blog = new Blog( {} )
+const user = new User( { name, email, username } )
+
 describe( `addTOS`, () => {
   test( `A TOS can be added to the table`, async () => {
-    let blog = new Blog( {} )
-    const user = new User( { name: `Tyler`, email: `me@me.com` } )
     const version = new Date().toISOString()
     await addBlog( `test-table`, blog )
     let result = await addUser( `test-table`, user )
     const tos = new TOS( {
-      userNumber: result.user.userNumber, version: version
+      username: result.user.username, version: version
     } )
     result = await addTOS( `test-table`, result.user, tos )
     expect( result ).toEqual( { tos } )
   } )
 
   test( `Returns an error when the TOS is in the table`, async () => {
-    let blog = new Blog( {} )
-    const user = new User( { name: `Tyler`, email: `me@me.com` } )
     const version = new Date().toISOString()
     await addBlog( `test-table`, blog )
     let result = await addUser( `test-table`, user )
     const tos = new TOS( {
-      userNumber: result.user.userNumber, version: version
+      username, version: version
     } )
     await addTOS( `test-table`, result.user, tos )
     result = await addTOS( `test-table`, result.user, tos )
@@ -35,9 +38,8 @@ describe( `addTOS`, () => {
   } )
 
   test( `Returns error when the table does not exist`, async () => {
-    const user = new User( { name: `Tyler`, email: `me@me.com` } )
     const tos = new TOS( {
-      userNumber: 1, version: new Date().toISOString()
+      username, version: new Date().toISOString()
     } )
     const result = await addTOS( `table-not-exist`, user, tos )
     expect( result ).toEqual( { 'error': `Table does not exist` } )
@@ -48,7 +50,6 @@ describe( `addTOS`, () => {
   } )
 
   test( `Throws an error when no user object is given`, async () => {
-    const user = new User( { name: `Tyler`, email: `me@me.com` } )
     await expect( 
       addTOS( `test-table`, user ) 
     ).rejects.toThrow( `Must give terms of service` )

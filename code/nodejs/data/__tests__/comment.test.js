@@ -9,29 +9,33 @@ const { Blog, User, Post, Comment, Vote } = require( `../../entities` )
 const { getPostDetails } = require( `../post` )
 const { getUserDetails } = require( `../user` )
 
+const name = `Tyler`
+const email = `someone@me.com`
+const username = `4ec5a264-733d-4ee5-b59c-7911539e3942`
+const slug = `/`
+const title = `Tyler Norlund`
+const userCommentNumber = 1
+const text = `This is a new comment.`
+
+const blog = new Blog( {} )
+const user = new User( { name, email, username } )
+const post = new Post( { slug, title } )
+
 describe( `addComment`, () => {
   test( `A comment can be added to the table`, async () => {
-    const blog = new Blog( {} )
-    const user = new User( { name: `Tyler`, email: `me@me.com` } )
-    const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
     const comment = new Comment( {
-      userNumber: 1, userCommentNumber: 1, userName: `Tyler`, slug: `/`, 
-      text: `This is a new comment.`, vote: 1, numberVotes: 1
+      username, userCommentNumber, name, slug, text, vote: 1, numberVotes: 1
     } )
     const vote = new Vote( { 
-      userNumber: 1, userName: `Tyler`, slug: `/`, voteNumber: 1, up: true,
+      username, name, slug, voteNumber: 1, up: true,
       replyChain: [ comment.dateAdded ]
     } )
     await addBlog( `test-table`, blog )
     await addPost( `test-table`, post )
     await addUser( `test-table`, user )
-    const result = await addComment( 
-      `test-table`, user, post, `This is a new comment.`
-    )
+    const result = await addComment( `test-table`, user, post, text )
     expect( { 
-      comment: { 
-        ...result.comment, dateAdded: undefined 
-      },
+      comment: { ...result.comment, dateAdded: undefined },
       vote: {
         ...result.vote, dateAdded: undefined, replyChain: undefined
       }
@@ -42,15 +46,16 @@ describe( `addComment`, () => {
   } )
 
   test( `A comment reply can be added to the table`, async () => {
-    const blog = new Blog( {} )
-    const user = new User( { name: `Tyler`, email: `me@me.com` } )
-    const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
+    /** 
+     * The comment needs 2 user comments because the user is replying to their 
+     * own comment.  
+     */
     const comment = new Comment( {
-      userNumber: 1, userCommentNumber: 2, userName: `Tyler`, slug: `/`, 
-      text: `This is a reply.`, vote: 1, numberVotes: 1
+      username, userCommentNumber: 2, name, slug, text: `This is a reply.`, 
+      vote: 1, numberVotes: 1
     } )
     const vote = new Vote( { 
-      userNumber: 1, userName: `Tyler`, slug: `/`, voteNumber: 1, up: true,
+      username, name, slug, voteNumber: 1, up: true, 
       replyChain: [ comment.dateAdded ]
     } )
     await addBlog( `test-table`, blog )
@@ -64,9 +69,7 @@ describe( `addComment`, () => {
       [ first_comment.comment.dateAdded ]
     )
     expect( { 
-      comment: { 
-        ...second_comment.comment, dateAdded: undefined 
-      },
+      comment: { ...second_comment.comment, dateAdded: undefined },
       vote: {
         ...second_comment.vote, dateAdded: undefined, replyChain: undefined
       }
@@ -81,8 +84,6 @@ describe( `addComment`, () => {
   } )
 
   test( `Returns error when the user does not exist`, async () => {
-    const user = new User( { name: `Tyler`, email: `me@me.com` } )
-    const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
     const result = await addComment( 
       `test-table`, user, post, `This is a new comment.`
     )
@@ -90,9 +91,7 @@ describe( `addComment`, () => {
   } )
 
   test( `Returns error when the post does not exist`, async () => {
-    const user = new User( { name: `Tyler`, email: `me@me.com` } )
-    const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
-    await addBlog( `test-table`, new Blog( {} ) )
+    await addBlog( `test-table`, blog )
     await addUser( `test-table`, user )
     const result = await await addComment( 
       `test-table`, user, post, `This is a new comment.`
@@ -101,8 +100,6 @@ describe( `addComment`, () => {
   } )
 
   test( `Returns error when the table does not exist`, async () => {
-    const user = new User( { name: `Tyler`, email: `me@me.com` } )
-    const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
     const result = await addComment( 
       `not-a-table`, user, post, `This is a new comment.`
     )
@@ -116,15 +113,12 @@ describe( `addComment`, () => {
   } )
 
   test( `Throws an error when no post object is given.`, async () => {
-    const user = new User( { name: `Tyler`, email: `me@me.com` } )
     await expect( 
       addComment( `test-table`, user )
     ).rejects.toThrow( `Must give post` )
   } )
 
   test( `Throws an error when no comment text is given.`, async () => {
-    const user = new User( { name: `Tyler`, email: `me@me.com` } )
-    const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
     await expect( 
       addComment( `test-table`, user, post )
     ).rejects.toThrow( `Must give the text of the comment` )
@@ -139,12 +133,8 @@ describe( `addComment`, () => {
 
 describe( `getComment`, () => {
   test( `A comment can be queried from to the table`, async () => {
-    const blog = new Blog( {} )
-    const user = new User( { name: `Tyler`, email: `me@me.com` } )
-    const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
     const comment = new Comment( {
-      userNumber: 1, userCommentNumber: 1, userName: `Tyler`, slug: `/`, 
-      text: `This is a new comment.`, vote: 1, numberVotes: 1
+      username, userCommentNumber: 1, name, slug, text, vote: 1, numberVotes: 1
     } )
     await addBlog( `test-table`, blog )
     await addPost( `test-table`, post )
@@ -158,10 +148,10 @@ describe( `getComment`, () => {
     } ).toEqual( { comment: { ...comment, dateAdded: undefined } } )
   } )
 
-  test( `Returns an error the comment is not in the table`, async () => {
+  test( `Returns an error when the comment is not in the table`, async () => {
     const comment = new Comment( {
-      userNumber: 1, userCommentNumber: 2, userName: `Tyler`, slug: `/`, 
-      text: `This is a reply.`, vote: 1, numberVotes: 1
+      username, userCommentNumber: 2, name, slug, text: `This is a reply`, 
+      vote: 1, numberVotes: 1
     } )
     const result = await getComment( `test-table`, comment )
     expect( result ).toEqual( { error: `Comment does not exist` } )
@@ -169,8 +159,8 @@ describe( `getComment`, () => {
 
   test( `Returns error when the table does not exist`, async () => {
     const comment = new Comment( {
-      userNumber: 1, userCommentNumber: 2, userName: `Tyler`, slug: `/`, 
-      text: `This is a reply.`, vote: 1, numberVotes: 1
+      username, userCommentNumber: 2, name, slug, text: `This is a reply`, 
+      vote: 1, numberVotes: 1
     } )
     const result = await getComment( `not-a-table`, comment )
     expect( result ).toEqual( { 'error': `Table does not exist` } )
@@ -192,9 +182,6 @@ describe( `getComment`, () => {
 describe( `removeComment`, () => {
   test( `A comment and its details can be removed from the table`,
     async () => {
-      const blog = new Blog( {} )
-      const user = new User( { name: `Tyler`, email: `me@me.com` } )
-      const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
       await addBlog( `test-table`, blog )
       await addPost( `test-table`, post )
       await addUser( `test-table`, user )
@@ -203,7 +190,7 @@ describe( `removeComment`, () => {
       )
       comment = result.comment 
       result = await addComment(
-        `test-table`, user, post, `This is a reply`, [comment.dateAdded]
+        `test-table`, user, post, `This is a reply`, [ comment.dateAdded ]
       )
       result = await removeComment( `test-table`, comment )
       expect( result ).toEqual( comment )
@@ -216,9 +203,6 @@ describe( `removeComment`, () => {
   
   test( `A reply comment and its details can be removed from the table`,
     async () => {
-      const blog = new Blog( {} )
-      const user = new User( { name: `Tyler`, email: `me@me.com` } )
-      const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
       await addBlog( `test-table`, blog )
       await addPost( `test-table`, post )
       await addUser( `test-table`, user )
@@ -227,7 +211,7 @@ describe( `removeComment`, () => {
       )
       const base_comment = result.comment 
       result = await addComment(
-        `test-table`, user, post, `This is a reply`, [base_comment.dateAdded]
+        `test-table`, user, post, `This is a reply`, [ base_comment.dateAdded ]
       )
       post.numberComments += 1
       user.numberComments += 1
@@ -247,8 +231,8 @@ describe( `removeComment`, () => {
 
   test( `Returns error when the table does not exist`, async () => {
     const comment = new Comment( {
-      userNumber: 1, userCommentNumber: 2, userName: `Tyler`, slug: `/`, 
-      text: `This is a reply.`, vote: 1, numberVotes: 1
+      username, userCommentNumber: 2, name, slug, text: `This is a reply`, 
+      vote: 1, numberVotes: 1
     } )
     const result = await removeComment( `not-a-table`, comment )
     expect( result ).toEqual( { 'error': `Table does not exist` } )
@@ -269,12 +253,8 @@ describe( `removeComment`, () => {
 
 describe( `incrementNumberCommentVotes`, () => {
   test( `The number of votes a comment has can be incremented`, async () => {
-    const blog = new Blog( {} )
-    const user = new User( { name: `Tyler`, email: `me@me.com` } )
-    const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
     let comment = new Comment( {
-      userNumber: 1, userCommentNumber: 1, userName: `Tyler`, slug: `/`, 
-      text: `This is a new comment.`, vote: 1, numberVotes: 1
+      username, userCommentNumber: 2, name, slug, text, vote: 1, numberVotes: 1
     } )
     await addBlog( `test-table`, blog )
     await addPost( `test-table`, post )
@@ -295,8 +275,7 @@ describe( `incrementNumberCommentVotes`, () => {
 
   test( `Returns error when the comment does not exist`, async () => { 
     const comment = new Comment( {
-      userNumber: 1, userCommentNumber: 1, userName: `Tyler`, slug: `/`, 
-      text: `This is a new comment.`, vote: 1, numberVotes: 1
+      username, userCommentNumber: 1, name, slug, text, vote: 1, numberVotes: 1
     } )
     const result = await incrementNumberCommentVotes( `test-table`, comment )
     expect( result ).toEqual( { 'error': `Comment does not exist` } )
@@ -304,8 +283,7 @@ describe( `incrementNumberCommentVotes`, () => {
 
   test( `Returns error when the table does not exist`, async () => { 
     const comment = new Comment( {
-      userNumber: 1, userCommentNumber: 1, userName: `Tyler`, slug: `/`, 
-      text: `This is a new comment.`, vote: 1, numberVotes: 1
+      username, userCommentNumber: 1, name, slug, text, vote: 1, numberVotes: 1
     } )
     const result = await incrementNumberCommentVotes( 
       `table-not-exist`, comment 
@@ -327,13 +305,9 @@ describe( `incrementNumberCommentVotes`, () => {
 } )
 
 describe( `decrementNumberCommentVotes`, () => {
-  test( `The number of votes a comment has can be incremented`, async () => {
-    const blog = new Blog( {} )
-    const user = new User( { name: `Tyler`, email: `me@me.com` } )
-    const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
+  test( `The number of votes a comment has can be decrement`, async () => {
     let comment = new Comment( {
-      userNumber: 1, userCommentNumber: 1, userName: `Tyler`, slug: `/`, 
-      text: `This is a new comment.`, vote: 1, numberVotes: 1
+      username, userCommentNumber: 2, name, slug, text, vote: 1, numberVotes: 0
     } )
     await addBlog( `test-table`, blog )
     await addPost( `test-table`, post )
@@ -344,7 +318,6 @@ describe( `decrementNumberCommentVotes`, () => {
     const result = await decrementNumberCommentVotes( 
       `test-table`, comment_result.comment 
     )
-    comment.numberVotes -= 1
     expect( { 
       comment: { ...result.comment, dateAdded: undefined } 
     } ).toEqual( { 
@@ -354,8 +327,7 @@ describe( `decrementNumberCommentVotes`, () => {
 
   test( `Returns error when the comment does not exist`, async () => { 
     const comment = new Comment( {
-      userNumber: 1, userCommentNumber: 1, userName: `Tyler`, slug: `/`, 
-      text: `This is a new comment.`, vote: 1, numberVotes: 1
+      username, userCommentNumber: 1, name, slug, text, vote: 1, numberVotes: 1
     } )
     const result = await decrementNumberCommentVotes( `test-table`, comment )
     expect( result ).toEqual( { 'error': `Comment does not exist` } )
@@ -363,8 +335,7 @@ describe( `decrementNumberCommentVotes`, () => {
 
   test( `Returns error when the table does not exist`, async () => { 
     const comment = new Comment( {
-      userNumber: 1, userCommentNumber: 1, userName: `Tyler`, slug: `/`, 
-      text: `This is a new comment.`, vote: 1, numberVotes: 1
+      username, userCommentNumber: 1, name, slug, text, vote: 1, numberVotes: 1
     } )
     const result = await decrementNumberCommentVotes( 
       `table-not-exist`, comment 
@@ -386,13 +357,9 @@ describe( `decrementNumberCommentVotes`, () => {
 } )
 
 describe( `incrementCommentVote`, () => {
-  test( `The number of votes a comment has can be incremented`, async () => {
-    const blog = new Blog( {} )
-    const user = new User( { name: `Tyler`, email: `me@me.com` } )
-    const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
+  test( `The vote a comment has can be incremented`, async () => {
     let comment = new Comment( {
-      userNumber: 1, userCommentNumber: 1, userName: `Tyler`, slug: `/`, 
-      text: `This is a new comment.`, vote: 1, numberVotes: 1
+      username, userCommentNumber: 2, name, slug, text, vote: 2, numberVotes: 1
     } )
     await addBlog( `test-table`, blog )
     await addPost( `test-table`, post )
@@ -403,7 +370,6 @@ describe( `incrementCommentVote`, () => {
     const result = await incrementCommentVote( 
       `test-table`, comment_result.comment 
     )
-    comment.vote += 1
     expect( { 
       comment: { ...result.comment, dateAdded: undefined } 
     } ).toEqual( { 
@@ -413,8 +379,7 @@ describe( `incrementCommentVote`, () => {
 
   test( `Returns error when the comment does not exist`, async () => { 
     const comment = new Comment( {
-      userNumber: 1, userCommentNumber: 1, userName: `Tyler`, slug: `/`, 
-      text: `This is a new comment.`, vote: 1, numberVotes: 1
+      username, userCommentNumber: 1, name, slug, text, vote: 1, numberVotes: 1
     } )
     const result = await incrementCommentVote( `test-table`, comment )
     expect( result ).toEqual( { 'error': `Comment does not exist` } )
@@ -422,8 +387,7 @@ describe( `incrementCommentVote`, () => {
 
   test( `Returns error when the table does not exist`, async () => { 
     const comment = new Comment( {
-      userNumber: 1, userCommentNumber: 1, userName: `Tyler`, slug: `/`, 
-      text: `This is a new comment.`, vote: 1, numberVotes: 1
+      username, userCommentNumber: 1, name, slug, text, vote: 1, numberVotes: 1
     } )
     const result = await incrementCommentVote( 
       `table-not-exist`, comment 
@@ -445,13 +409,9 @@ describe( `incrementCommentVote`, () => {
 } )
 
 describe( `decrementCommentVote`, () => {
-  test( `The number of votes a comment has can be incremented`, async () => {
-    const blog = new Blog( {} )
-    const user = new User( { name: `Tyler`, email: `me@me.com` } )
-    const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
+  test( `The vote a comment has can be decremented`, async () => {
     let comment = new Comment( {
-      userNumber: 1, userCommentNumber: 1, userName: `Tyler`, slug: `/`, 
-      text: `This is a new comment.`, vote: 1, numberVotes: 1
+      username, userCommentNumber: 2, name, slug, text, vote: 0, numberVotes: 1
     } )
     await addBlog( `test-table`, blog )
     await addPost( `test-table`, post )
@@ -462,7 +422,6 @@ describe( `decrementCommentVote`, () => {
     const result = await decrementCommentVote( 
       `test-table`, comment_result.comment 
     )
-    comment.vote -= 1
     expect( { 
       comment: { ...result.comment, dateAdded: undefined } 
     } ).toEqual( { 
@@ -472,8 +431,7 @@ describe( `decrementCommentVote`, () => {
 
   test( `Returns error when the comment does not exist`, async () => { 
     const comment = new Comment( {
-      userNumber: 1, userCommentNumber: 1, userName: `Tyler`, slug: `/`, 
-      text: `This is a new comment.`, vote: 1, numberVotes: 1
+      username, userCommentNumber: 2, name, slug, text, vote: 0, numberVotes: 1
     } )
     const result = await decrementCommentVote( `test-table`, comment )
     expect( result ).toEqual( { 'error': `Comment does not exist` } )
@@ -481,8 +439,7 @@ describe( `decrementCommentVote`, () => {
 
   test( `Returns error when the table does not exist`, async () => { 
     const comment = new Comment( {
-      userNumber: 1, userCommentNumber: 1, userName: `Tyler`, slug: `/`, 
-      text: `This is a new comment.`, vote: 1, numberVotes: 1
+      username, userCommentNumber: 2, name, slug, text, vote: 0, numberVotes: 1
     } )
     const result = await decrementCommentVote( 
       `table-not-exist`, comment 

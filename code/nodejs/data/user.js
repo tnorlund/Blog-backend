@@ -21,8 +21,6 @@ const addUser = async ( tableName, user ) => {
     throw new Error( `Must give user` )
   const { blog, error } = await incrementNumberBlogUsers( tableName )
   if ( error ) return { error: error }
-  // Set the user's number to the new number of users in the blog.
-  user.userNumber = blog.numberUsers
   try {
     await dynamoDB.putItem( {
       TableName: tableName,
@@ -114,13 +112,13 @@ const getUserDetails = async ( tableName, user ) => {
  * Updates the name of a user.
  * @param {String} tableName The name of the DynamoDB table.
  * @param {Object} user      The user to change the name of.
- * @param {String} username  The new name of the user.
+ * @param {String} name      The new name of the user.
  */
-const updateUserName = async ( tableName, user, username ) => {
+const updateUserName = async ( tableName, user, name ) => {
   if ( typeof tableName == `undefined` )
     throw new Error( `Must give the name of the DynamoDB table` )
   if ( typeof user == `undefined` ) throw new Error( `Must give user` )
-  if ( typeof username == `undefined` ) throw new Error( `Must give username` )
+  if ( typeof name == `undefined` ) throw new Error( `Must give new name` )
   const user_details = await getUserDetails( tableName, user )
   if ( user_details.error ) return user_details
   const transact_items = []
@@ -131,7 +129,7 @@ const updateUserName = async ( tableName, user, username ) => {
     ConditionExpression: `attribute_exists(PK)`,
     UpdateExpression: `SET #user = :user`,
     ExpressionAttributeNames: { '#user': `Name` },
-    ExpressionAttributeValues: { ':user': { 'S': username } },
+    ExpressionAttributeValues: { ':user': { 'S': name } },
   } } )
   // Update the follows
   user_details.follows.forEach( ( follow ) => {
@@ -140,8 +138,8 @@ const updateUserName = async ( tableName, user, username ) => {
       Key: follow.key(),
       ConditionExpression: `attribute_exists(PK)`,
       UpdateExpression: `SET #user = :user`,
-      ExpressionAttributeNames: { '#user': `UserName` },
-      ExpressionAttributeValues: { ':user': { 'S': username } }
+      ExpressionAttributeNames: { '#user': `Name` },
+      ExpressionAttributeValues: { ':user': { 'S': name } }
     } } )
   } )
   // Update the comments
@@ -151,8 +149,8 @@ const updateUserName = async ( tableName, user, username ) => {
       Key: comment.key(),
       ConditionExpression: `attribute_exists(PK)`,
       UpdateExpression: `SET #user = :user`,
-      ExpressionAttributeNames: { '#user': `User` },
-      ExpressionAttributeValues: { ':user': { 'S': username } }
+      ExpressionAttributeNames: { '#user': `Name` },
+      ExpressionAttributeValues: { ':user': { 'S': name } }
     } } )
   } )
   // Update the votes
@@ -162,8 +160,8 @@ const updateUserName = async ( tableName, user, username ) => {
       Key: vote.key(),
       ConditionExpression: `attribute_exists(PK)`,
       UpdateExpression: `SET #user = :user`,
-      ExpressionAttributeNames: { '#user': `UserName` },
-      ExpressionAttributeValues: { ':user': { 'S': username } }
+      ExpressionAttributeNames: { '#user': `Name` },
+      ExpressionAttributeValues: { ':user': { 'S': name } }
     } } )
   } )
   try {
@@ -180,7 +178,7 @@ const updateUserName = async ( tableName, user, username ) => {
         } ).promise()
       }
     }
-    user.name = username
+    user.name = name
     return user
   } catch( error ) { 
     console.log( `error`, error )

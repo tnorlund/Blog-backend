@@ -18,7 +18,7 @@ exports.handler = async ( event, context ) => {
     isBase64Encoded: false
   } 
   try {
-    parsedBody = JSON.parse( event.body )
+    const parsedBody = JSON.parse( event.body )
   } catch( error ) {
     return {
       statusCode: 500, 

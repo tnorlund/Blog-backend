@@ -1,25 +1,23 @@
 const { User, userFromItem } = require( `..` )
-const { ZeroPadNumber } = require( `../utils` )
 
 const name = `Tyler`
 const email = `someone@me.com`
+const username = `4ec5a264-733d-4ee5-b59c-7911539e3942`
 const dateJoined = new Date()
 
 const validUsers = [
-  { name, email, dateJoined },
-  { name, email, userNumber: `0`, dateJoined },
-  { name, email, userNumber: `0`, dateJoined: dateJoined.toISOString() },
-  { name, email, dateJoined, numberFollows: `0` },
-  { name, email, dateJoined, numberComments: `0` },
-  { name, email, dateJoined, numberVotes: `0` },
-  { name, email, dateJoined, totalKarma: `0` },
+  { name, email, username, dateJoined: dateJoined },
+  { name, email, username, dateJoined: dateJoined.toISOString() },
+  { name, email, username, dateJoined, numberFollows: `0` },
+  { name, email, username, dateJoined, numberComments: `0` },
+  { name, email, username, dateJoined, numberVotes: `0` },
+  { name, email, username, dateJoined, totalKarma: `0` },
 ]
 
 const invalidUsers = [
   {},
   { name },
-  { name, email, userNumber: `something`},
-  { name, email, userNumber: `-1`},
+  { name, email, username: `something`},
   { name, email, numberFollows: `something`},
   { name, email, numberFollows: `-1`},
   { name, email, numberComments: `something` },
@@ -36,7 +34,7 @@ describe( `user object`, () => {
       const user = new User( parameter )
       expect( user.name ).toEqual( name )
       expect( user.email ).toEqual( email )
-      expect( user.userNumber ).toEqual( 0 )
+      expect( user.username ).toEqual( username )
       expect( user.dateJoined ).toEqual( dateJoined )
       expect( user.numberFollows ).toEqual( 0 )
       expect( user.numberComments ).toEqual( 0 )
@@ -50,17 +48,17 @@ describe( `user object`, () => {
     parameter => expect( () => new User( parameter ) ).toThrow()
   )
 
-  test( `pk`, () => expect( new User( { name, email } ).pk() ).toEqual( {
-    'S': `USER#${ ZeroPadNumber( 0 ) }`
+  test( `pk`, () => expect( new User( { name, email, username } ).pk() ).toEqual( {
+    'S': `USER#${ username }`
   } ) )
 
-  test( `key`, () => expect( new User( { name, email } ).key() ).toEqual( {
-    'PK': { 'S': `USER#${ ZeroPadNumber( 0 ) }` },
+  test( `key`, () => expect( new User( { name, email, username } ).key() ).toEqual( {
+    'PK': { 'S': `USER#${ username }` },
     'SK': { 'S': `#USER` }
   } ) )
 
-  test( `toItem`, () => expect( new User( { name, email, dateJoined } ).toItem() ).toEqual( {
-    'PK': { 'S': `USER#${ ZeroPadNumber( 0 ) }` },
+  test( `toItem`, () => expect( new User( { name, email, username, dateJoined } ).toItem() ).toEqual( {
+    'PK': { 'S': `USER#${ username }` },
     'SK': { 'S': `#USER` },
     'Type': { 'S': `user` },
     'Name': { 'S': name },
@@ -73,7 +71,7 @@ describe( `user object`, () => {
   } ) )
 
   test( `userFromItem`, () => {
-    const user = new User( { name, email, dateJoined } )
+    const user = new User( { name, email, username, dateJoined } )
     expect( userFromItem( user.toItem() ) ).toEqual( user )
   } )
 

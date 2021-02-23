@@ -4,18 +4,20 @@ const {
 } = require( `..` )
 const { Blog, User, Project, ProjectFollow } = require( `../../entities` )
 
+const name = `Tyler`
+const email = `someone@me.com`
+const username = `4ec5a264-733d-4ee5-b59c-7911539e3942`
+const slug = `/`
+const title = `Tyler Norlund`
+
+const blog = new Blog( {} )
+const user = new User( { name, email, username } )
+const project = new Project( { slug, title } )
+
 describe( `addProjectFollow`, () => {
   test( `A user can follow a project`, async () => {
-    const blog = new Blog( {} )
-    const user = new User( {
-      name: `Tyler`, email: `me@me.com`
-    } )
-    const project = new Project( {
-      slug: `/`, title: `Tyler Norlund`
-    } )
     const projectFollow = new ProjectFollow( {
-      userName: `Tyler`, userNumber: 1, userFollowNumber: 1, email: `me@me.com`,
-      slug: `/`, title: `Tyler Norlund`, projectFollowNumber: 1
+      username, name, email, slug, title
     } )
     await addBlog( `test-table`, blog )
     const user_response = await addUser( `test-table`, user )
@@ -29,13 +31,6 @@ describe( `addProjectFollow`, () => {
   } )
 
   test( `Returns an error when already following the project`, async () => {
-    const blog = new Blog( {} )
-    const user = new User( {
-      name: `Tyler`, email: `me@me.com`
-    } )
-    const project = new Project( {
-      slug: `/`, title: `Tyler Norlund`
-    } )
     await addBlog( `test-table`, blog )
     const user_response = await addUser( `test-table`, user )
     const project_response = await addProject( `test-table`, project )
@@ -51,13 +46,6 @@ describe( `addProjectFollow`, () => {
   } )
 
   test( `Returns an error when the project does not exist`, async () => {
-    const blog = new Blog( {} )
-    const user = new User( {
-      name: `Tyler`, email: `me@me.com`
-    } )
-    const project = new Project( {
-      slug: `/`, title: `Tyler Norlund`
-    } )
     await addBlog( `test-table`, blog )
     const user_response = await addUser( `test-table`, user )
     const result = await addProjectFollow( 
@@ -69,13 +57,6 @@ describe( `addProjectFollow`, () => {
   } )
 
   test( `Returns an error when the user does not exist`, async () => {
-    const blog = new Blog( {} )
-    const user = new User( {
-      name: `Tyler`, email: `me@me.com`
-    } )
-    const project = new Project( {
-      slug: `/`, title: `Tyler Norlund`
-    } )
     await addBlog( `test-table`, blog )
     await addProject( `test-table`, project )
     const result = await addProjectFollow( 
@@ -93,9 +74,6 @@ describe( `addProjectFollow`, () => {
   } )
 
   test( `Throws an error when no project object is given`, async () => {
-    const user = new User( {
-      name: `Tyler`, email: `me@me.com`
-    } )
     await expect(
       addProjectFollow( `test-table`, user )
     ).rejects.toThrow( `Must give project` )
@@ -110,13 +88,6 @@ describe( `addProjectFollow`, () => {
 
 describe( `removeProjectFollow`, () => {
   test( `A user can remove their follow from a project`, async () => {
-    const blog = new Blog( {} )
-    const user = new User( {
-      name: `Tyler`, email: `me@me.com`
-    } )
-    const project = new Project( {
-      slug: `/`, title: `Tyler Norlund`
-    } )
     await addBlog( `test-table`, blog )
     const user_response = await addUser( `test-table`, user )
     const project_response = await addProject( `test-table`, project )
@@ -130,20 +101,29 @@ describe( `removeProjectFollow`, () => {
   } )
 
   test( `Returns an error when not following the project`, async () => {
-    const blog = new Blog( {} )
-    const user_a = new User( { name: `Tyler`, email: `me@me.com` } )
-    const user_b = new User( { name: `Joe`, email: `joe@me.com` } )
-    const project_a = new Project( { slug: `/`, title: `Tyler Norlund` } )
-    const project_b = new Project( { slug: `/b`, title: `Project B` } )
+    const secondary_user_name = `Joe`
+    const secondary_user_email = `joe@me.com`
+    const secondary_user_username = `11bf5b37-e0b8-42e0-8dcf-dc8c4aefc000`
+    const secondary_slug = `/b`
+    const secondary_title = `Project B`
+    const secondary_user = new User( {
+      name: secondary_user_name, 
+      email: secondary_user_email, 
+      username: secondary_user_username
+    } ) 
+    const secondary_project = new Project( { 
+      slug: secondary_slug, 
+      title: secondary_title
+    } )
     await addBlog( `test-table`, blog )
-    await addUser( `test-table`, user_a )
-    await addUser( `test-table`, user_b )
-    await addProject( `test-table`, project_a )
-    await addProject( `test-table`, project_b )
-    await addProjectFollow( `test-table`, user_a, project_b )
-    await addProjectFollow( `test-table`, user_b, project_a )
-    const project_response = await getProject( `test-table`, project_a )
-    const user_response = await getUser( `test-table`, user_a )
+    await addUser( `test-table`, user )
+    await addUser( `test-table`, secondary_user )
+    await addProject( `test-table`, project )
+    await addProject( `test-table`, secondary_project )
+    await addProjectFollow( `test-table`, user, secondary_project )
+    await addProjectFollow( `test-table`, secondary_user, project )
+    const project_response = await getProject( `test-table`, project )
+    const user_response = await getUser( `test-table`, user )
     const result = await removeProjectFollow(
       `test-table`, user_response.user, project_response.project 
     )
@@ -153,40 +133,31 @@ describe( `removeProjectFollow`, () => {
   } )
 
   test( `Returns an error when the project does not exist`, async () => {
-    const blog = new Blog( {} )
-    const user = new User( {
-      name: `Tyler`, email: `me@me.com`
-    } )
-    const project = new Project( {
-      slug: `/`, title: `Tyler Norlund`
-    } )
     await addBlog( `test-table`, blog )
     const user_response = await addUser( `test-table`, user )
     const result = await removeProjectFollow( 
       `test-table`, user_response.user, project
     )
-    expect( result ).toEqual( {
-      error: `Project does not exist`
-    } )
+    expect( result ).toEqual( { error: `Project does not exist` } )
   } )
 
   test( `Returns an error when the user does not exist`, async () => {
-    const blog = new Blog( {} )
-    const user_a = new User( { name: `Tyler`, email: `me@me.com` } )
-    const user_b = new User( { name: `Joe`, email: `joe@me.com` } )
-    const project = new Project( {
-      slug: `/`, title: `Tyler Norlund`
-    } )
+    const secondary_user_name = `Joe`
+    const secondary_user_email = `joe@me.com`
+    const secondary_user_username = `11bf5b37-e0b8-42e0-8dcf-dc8c4aefc000`
+    const secondary_user = new User( {
+      name: secondary_user_name, 
+      email: secondary_user_email, 
+      username: secondary_user_username
+    } ) 
     await addBlog( `test-table`, blog )
     await addProject( `test-table`, project )
-    await addUser( `test-table`, user_b )
-    await addProjectFollow( `test-table`, user_b, project )
+    await addUser( `test-table`, secondary_user )
+    await addProjectFollow( `test-table`, secondary_user, project )
     const result = await removeProjectFollow( 
-      `test-table`, user_a, project
+      `test-table`, user, project
     )
-    expect( result ).toEqual( {
-      error: `User does not exist`
-    } )
+    expect( result ).toEqual( { error: `User does not exist` } )
   } )
 
   test( `Throws an error when no user object is given`, async () => {
@@ -196,9 +167,6 @@ describe( `removeProjectFollow`, () => {
   } )
 
   test( `Throws an error when no project object is given`, async () => {
-    const user = new User( {
-      name: `Tyler`, email: `me@me.com`
-    } )
     await expect(
       removeProjectFollow( `test-table`, user )
     ).rejects.toThrow( `Must give project` )

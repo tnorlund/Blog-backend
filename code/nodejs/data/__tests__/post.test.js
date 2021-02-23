@@ -7,18 +7,24 @@ const {
 } = require( `..` )
 const { Blog, Post, User } = require( `../../entities` )
 
+const name = `Tyler`
+const email = `someone@me.com`
+const username = `4ec5a264-733d-4ee5-b59c-7911539e3942`
+const slug = `/`
+const title = `Tyler Norlund`
+
+const blog = new Blog( {} )
+const user = new User( { name, email, username } )
+const post = new Post( { slug, title } )
+
 describe( `addPost`, () => {
   test( `A post can be added to the table`, async () => {
-    let blog = new Blog( {} )
-    const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
     await addBlog( `test-table`, blog )
     const result = await addPost( `test-table`, post )
     expect( result ).toEqual( { post } )
   } )
 
   test( `Returns an error when the post is in the table`, async () => {
-    let blog = new Blog( {} )
-    const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
     await addBlog( `test-table`, blog )
     await addPost( `test-table`, post )
     const result = await addPost( `test-table`, post )
@@ -28,8 +34,6 @@ describe( `addPost`, () => {
   } )
 
   test( `Returns error when the table does not exist`, async () => {
-    let blog = new Blog( {} )
-    const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
     await addBlog( `test-table`, blog )
     const result = await addPost( `table-not-exist`, post )
     expect( result ).toEqual( { 'error': `Table does not exist` } )
@@ -50,9 +54,6 @@ describe( `addPost`, () => {
 
 describe( `getPostDetails`, () => {
   test( `A post and its details can be queried from the table`, async () => {
-    const blog = new Blog( {} )
-    const user = new User( { name: `Tyler`, email: `me@me.com` } )
-    const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
     await addBlog( `test-table`, blog )
     await addPost( `test-table`, post )
     await addUser( `test-table`, user )
@@ -88,8 +89,6 @@ describe( `getPostDetails`, () => {
   } )
 
   test( `Returns an error when the post is not in the table`, async () => {
-    let blog = new Blog( {} )
-    const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
     await addBlog( `test-table`, blog )
     const result = await getPostDetails( `test-table`, post )
     expect( result ).toEqual( {
@@ -98,8 +97,6 @@ describe( `getPostDetails`, () => {
   } )
 
   test( `Returns error when the table does not exist`, async () => {
-    let blog = new Blog( {} )
-    const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
     await addBlog( `test-table`, blog )
     const result = await getPostDetails( `table-not-exist`, post )
     expect( result ).toEqual( { 'error': `Table does not exist` } )
@@ -120,9 +117,6 @@ describe( `getPostDetails`, () => {
 
 describe( `removePost`, () => {
   test( `The post can be removed from the table`, async () => {
-    const blog = new Blog( {} )
-    const user = new User( { name: `Tyler`, email: `me@me.com` } )
-    const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
     await addBlog( `test-table`, blog )
     await addPost( `test-table`, post )
     await addUser( `test-table`, user )
@@ -160,8 +154,6 @@ describe( `removePost`, () => {
 
 describe( `incrementNumberPostComments`, () => {
   test( `The number of comments the post has can be incremented`, async () => { 
-    let blog = new Blog( {} )
-    const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
     await addBlog( `test-table`, blog )
     await addPost( `test-table`, post )
     const result = await incrementNumberPostComments( `test-table`, post )
@@ -200,10 +192,6 @@ describe( `incrementNumberPostComments`, () => {
 
 describe( `decrementNumberPostComments`, () => {
   test( `The number of comments the post has can be decremented`, async () => { 
-    let blog = new Blog( {} )
-    const post = new Post( { 
-      slug: `/`, title: `Tyler Norlund`, numberComments: 1 
-    } )
     await addBlog( `test-table`, blog )
     await addPost( `test-table`, post )
     const result = await decrementNumberPostComments( `test-table`, post )
@@ -212,8 +200,6 @@ describe( `decrementNumberPostComments`, () => {
   } )
 
   test( `Returns an error when the post is not in the table`, async () => {
-    let blog = new Blog( {} )
-    const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
     await addBlog( `test-table`, blog )
     const result = await decrementNumberPostComments( `test-table`, post )
     expect( result ).toEqual( {
@@ -222,7 +208,6 @@ describe( `decrementNumberPostComments`, () => {
   } )
 
   test( `Returns error when the table does not exist`, async () => {
-    const post = new Post( { slug: `/`, title: `Tyler Norlund` } )
     const result = await decrementNumberPostComments( `table-not-exist`, post )
     expect( result ).toEqual( { 'error': `Table does not exist` } )
   } )

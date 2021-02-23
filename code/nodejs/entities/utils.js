@@ -42,6 +42,18 @@ const isIP = ( ip ) => {
 }
 
 /**
+ * Determines whether a string is formatted as an UUID.
+ * @param {String} username The UUID used as a username.
+ */
+const isUsername = ( username ) => {
+  if (typeof username !== `string`)
+    throw Error( `Must pass UUID username as a string` )
+  return Boolean( username.match( 
+    /[a-z0-9]{8}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{12}/
+  ) )
+}
+
+/**
  * Converts a Javascript variable into DynamoDB syntax.
  * @param {Any} variable The variable to be converted.
  * @returns {Map} The variable as a DynamoDB attribute.
@@ -86,5 +98,10 @@ const mappingToObject = ( mapping ) => {
 }
 
 module.exports = { 
-  ZeroPadNumber, parseDate, isIP, variableToItemAttribute, mappingToObject
+  isIP, 
+  isUsername,
+  mappingToObject,
+  parseDate, 
+  variableToItemAttribute, 
+  ZeroPadNumber, 
 }

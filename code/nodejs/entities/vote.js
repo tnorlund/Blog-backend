@@ -1,19 +1,22 @@
-const { ZeroPadNumber, parseDate } = require( `./utils` )
+const { isUsername, parseDate } = require( `./utils` )
 class Vote {
   constructor( {
-    userNumber, userName, slug, voteNumber, up,
-    dateAdded = new Date(), replyChain = []
+    username, 
+    name, 
+    slug, 
+    voteNumber, 
+    up, 
+    dateAdded = new Date(), 
+    replyChain = []
   } ) {
-    if ( typeof userNumber === `undefined` )
-      throw new Error( `Must give the vote owner's number` )
-    if ( isNaN( userNumber ) )
-      throw new Error( `User's number must be a number` )
-    if ( parseInt( userNumber ) < 0 )
-      throw new Error( `User's number must be positive` )
-    this.userNumber = parseInt( userNumber )
-    if ( typeof userName === `undefined` )
+    if ( typeof username === `undefined` )
+      throw Error( `Must give the user's username` )
+    if ( !isUsername( username ) )
+      throw Error( `Username must be formatted as UUID` )
+    this.username = username
+    if ( typeof name === `undefined` )
       throw new Error( `Must give the vote owner's name` )
-    this.userName = userName
+    this.name = name
     if ( typeof slug === `undefined` ) 
       throw new Error( `Must give post's slug` )
     this.slug = slug
@@ -49,7 +52,7 @@ class Vote {
    */
   pk() {
     return {
-      'S': `USER#${ ZeroPadNumber( this.userNumber ) }`
+      'S': `USER#${ this.username }`
     }
   }
 
@@ -58,7 +61,7 @@ class Vote {
    */
   key() {
     return {
-      'PK': { 'S': `USER#${ ZeroPadNumber( this.userNumber ) }` },
+      'PK': { 'S': `USER#${ this.username }` },
       'SK': { 'S': `#VOTE#${ this.dateAdded.toISOString() }` }
     }
   }
@@ -90,7 +93,7 @@ class Vote {
       ...this.key(),
       ...this.gsi1(),
       'Type': { 'S': `vote` },
-      'UserName': { 'S': this.userName },
+      'Name': { 'S': this.name },
       'Slug': { 'S': this.slug },
       'VoteNumber': { 'N': this.voteNumber.toString() },
       'Up': { 'BOOL': this.up },
@@ -107,8 +110,8 @@ class Vote {
  */
 const voteFromItem = ( item ) => {
   return new Vote( {
-    userNumber: parseInt( item.PK.S.split( `#` )[1] ).toString(),
-    userName: item.UserName.S,
+    username: item.PK.S.split( `#` )[1],
+    name: item.Name.S,
     slug: item.Slug.S,
     voteNumber: item.VoteNumber.N,
     up: item.Up.BOOL,

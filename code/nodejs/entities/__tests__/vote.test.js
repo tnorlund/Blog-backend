@@ -1,8 +1,9 @@
 const { Vote, voteFromItem } = require( `..` )
+const { updateUserName } = require("../../data/user")
 const { ZeroPadNumber } = require( `../utils` )
 
-const userNumber = 1
-const userName = `Johnny Appleseed`
+const username = `4ec5a264-733d-4ee5-b59c-7911539e3942`
+const name = `Johnny Appleseed`
 const slug = `/`
 const voteNumber = 1
 const up = true
@@ -10,25 +11,25 @@ const dateAdded = new Date()
 const baseCommentDate = new Date()
 
 const validVotes = [
-  { userNumber, userName, slug, voteNumber, up, dateAdded, replyChain: [baseCommentDate] },
-  { userNumber, userName, slug, voteNumber, up, dateAdded: dateAdded.toISOString(), replyChain: [baseCommentDate] },
-  { userNumber, userName, slug, voteNumber, up, dateAdded, replyChain: [baseCommentDate] },
-  { userNumber, userName, slug, voteNumber, up, dateAdded, replyChain: [baseCommentDate.toISOString()] }
+  { username, name, slug, voteNumber, up, dateAdded, replyChain: [baseCommentDate] },
+  { username, name, slug, voteNumber, up, dateAdded: dateAdded.toISOString(), replyChain: [baseCommentDate] },
+  { username, name, slug, voteNumber, up, dateAdded, replyChain: [baseCommentDate] },
+  { username, name, slug, voteNumber, up, dateAdded, replyChain: [baseCommentDate.toISOString()] }
 ]
 
 const invalidVotes = [
   {},
-  { userNumber: `something` },
-  { userNumber: `-1` },
-  { userNumber },
-  { userNumber, userName },
-  { userNumber, userName, slug },
-  { userNumber, userName, slug, voteNumber: `something` },
-  { userNumber, userName, slug, voteNumber: `-1` },
-  { userNumber, userName, slug, voteNumber },
-  { userNumber, userName, slug, voteNumber, up, dateAdded, replyChain: [] },
-  { userNumber, userName, slug, voteNumber, up, dateAdded, replyChain: `something` },
-  { userNumber, userName, slug, voteNumber, up, dateAdded, replyChain: [{}] }
+  { username: `something` },
+  { username: `-1` },
+  { username },
+  { username, name },
+  { username, name, slug },
+  { username, name, slug, voteNumber: `something` },
+  { username, name, slug, voteNumber: `-1` },
+  { username, name, slug, voteNumber },
+  { username, name, slug, voteNumber, up, dateAdded, replyChain: [] },
+  { username, name, slug, voteNumber, up, dateAdded, replyChain: `something` },
+  { username, name, slug, voteNumber, up, dateAdded, replyChain: [{}] }
 ]
 
 describe( `vote object`, () => {
@@ -36,8 +37,8 @@ describe( `vote object`, () => {
     `valid constructor`,
     parameter => {
       const vote = new Vote( parameter )
-      expect( vote.userNumber ).toEqual( userNumber )
-      expect( vote.userName ).toEqual( userName )
+      expect( vote.username ).toEqual( username )
+      expect( vote.name ).toEqual( name )
       expect( vote.slug ).toEqual( slug )
       expect( vote.voteNumber ).toEqual( voteNumber )
       expect( vote.up ).toEqual( up )
@@ -51,38 +52,86 @@ describe( `vote object`, () => {
   )
 
   test( `pk`, () => {
-    expect( new Vote( { userNumber, userName, slug, voteNumber, up, dateAdded, replyChain: [baseCommentDate] } ).pk() ).toEqual( {
-      'S': `USER#${ ZeroPadNumber( userNumber ) }`
-    } )
+    expect( new Vote( { 
+        username, 
+        name, 
+        slug, 
+        voteNumber, 
+        up, 
+        dateAdded, 
+        replyChain: [baseCommentDate]
+    } ).pk() ).toEqual( { 'S': `USER#${ username }` } )
   } )
 
   test( `key`, () => {
-    expect( new Vote( { userNumber, userName, slug, voteNumber, up, dateAdded, replyChain: [baseCommentDate] } ).key() ).toEqual( {
-      'PK': { 'S': `USER#${ ZeroPadNumber( userNumber ) }` },
+    expect( new Vote( { 
+      username,
+      name,
+      slug,
+      voteNumber,
+      up,
+      dateAdded,
+      replyChain: [baseCommentDate] 
+    } ).key() ).toEqual( {
+      'PK': { 'S': `USER#${ username }` },
       'SK': { 'S': `#VOTE#${ dateAdded.toISOString() }` }
     } )
   } )
 
   test( `gsi1pk`, () => {
-    expect( new Vote( { userNumber, userName, slug, voteNumber, up, dateAdded, replyChain: [baseCommentDate] } ).gsi1pk() ).toEqual( {
+    expect( new Vote( { 
+      username,
+      name,
+      slug,
+      voteNumber,
+      up,
+      dateAdded,
+      replyChain: [baseCommentDate] 
+    } ).gsi1pk() ).toEqual( {
       'S': `POST#${ slug }`
     } )
   } )
 
   test( `gsi1`, () => {
-    expect( new Vote( { userNumber, userName, slug, voteNumber, up, dateAdded, replyChain: [baseCommentDate] } ).gsi1() ).toEqual( {
+    expect( new Vote( { 
+      username,
+      name,
+      slug,
+      voteNumber,
+      up,
+      dateAdded,
+      replyChain: [baseCommentDate] 
+    } ).gsi1() ).toEqual( {
       'GSI1PK': { 'S': `POST#${ slug }` },
-      'GSI1SK': { 'S': `#COMMENT#${ baseCommentDate.toISOString() }#VOTE#${ dateAdded.toISOString() }` }
+      'GSI1SK': { 
+        'S': `#COMMENT#${ 
+          baseCommentDate.toISOString() 
+        }#VOTE#${ 
+          dateAdded.toISOString() 
+        }` 
+      }
     } )
   } )
 
-  test( `toItem`, () => expect( new Vote( { userNumber, userName, slug, voteNumber, up, dateAdded, replyChain: [baseCommentDate] } ).toItem() ).toEqual( {
-    'PK': { 'S': `USER#${ ZeroPadNumber( userNumber ) }` },
+  test( `toItem`, () => expect( new Vote( { 
+    username, 
+    name, 
+    slug, 
+    voteNumber, 
+    up, 
+    dateAdded, 
+    replyChain: [baseCommentDate] } ).toItem() 
+  ).toEqual( {
+    'PK': { 'S': `USER#${ username }` },
     'SK': { 'S': `#VOTE#${ dateAdded.toISOString() }` },
     'GSI1PK': { 'S': `POST#${ slug }` },
-    'GSI1SK': { 'S': `#COMMENT#${ baseCommentDate.toISOString() }#VOTE#${ dateAdded.toISOString() }` },
+    'GSI1SK': { 
+      'S': `#COMMENT#${ 
+        baseCommentDate.toISOString() 
+      }#VOTE#${ dateAdded.toISOString() }` 
+    },
     'Type': { 'S': `vote` },
-    'UserName': { 'S': userName },
+    'Name': { 'S': name },
     'Slug': { 'S': slug },
     'VoteNumber': { 'N': voteNumber.toString() },
     'Up': { 'BOOL': up },
@@ -93,7 +142,7 @@ describe( `vote object`, () => {
     const first_date = new Date()
     const second_date = new Date()
     const vote = new Vote( { 
-      userNumber, userName, slug, voteNumber, up, dateAdded, 
+      username, name, slug, voteNumber, up, dateAdded, 
       replyChain: [first_date, second_date] 
     } )
     expect( voteFromItem( vote.toItem() ) ).toEqual( vote )

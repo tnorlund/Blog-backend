@@ -83,13 +83,18 @@ exports.handler = async ( event, context, callback ) => {
   }
 
   /** The details of the blog */
-  const { blog: blogResponse, error: blogError} = await getBlog( process.env.TABLE_NAME )
-  if ( blogError == 'Blog does not exist' ) await addBlog( process.env.TABLE_NAME, new Blog( {} ) )
+  const { 
+    blog: blogResponse, error: blogError
+  } = await getBlog( process.env.TABLE_NAME )
+  if ( blogError == 'Blog does not exist' ) 
+    await addBlog( process.env.TABLE_NAME, new Blog( {} ) )
   else if ( blogError ) {
     console.log( { blogError } )
     callback( blogError )
   }
-  const { blog: incrementedBlog, error: incrementError } = await incrementNumberBlogUsers( process.env.TABLE_NAME )
+  const { 
+    blog: incrementedBlog, error: incrementError 
+  } = await incrementNumberBlogUsers( process.env.TABLE_NAME )
   if ( incrementError ) {
     console.log( { incrementError } )
     callback( incrementError )
@@ -99,7 +104,7 @@ exports.handler = async ( event, context, callback ) => {
     new User( {
       name: event.request.userAttributes.name,
       email: event.request.userAttributes.email,
-      userNumber: incrementedBlog.numberUsers
+      username: event.request.userAttributes.sub
     } ) 
   )
   if ( userError ) {
