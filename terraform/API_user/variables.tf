@@ -14,6 +14,16 @@ variable "stage" {
   description = "The stage of the production."
 }
 
+variable "get_user_path" {
+  type = string
+  description = "The path to the file used in the GET Lambda Function"
+}
+
+variable "get_user_file_name" {
+  type = string
+  description = "The name of the file used in the GET Lambda function"
+}
+
 variable "get_user_details_path" {
   type = string
   description = "The path to the file used in the GET Lambda Function"

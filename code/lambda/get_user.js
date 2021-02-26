@@ -19,21 +19,21 @@ exports.handler = async ( event, context ) => {
     !event.queryStringParameters || (
       typeof event.queryStringParameters.name == `undefined` ||
       typeof event.queryStringParameters.email == `undefined` ||
-      typeof event.queryStringParameters.number == `undefined`
+      typeof event.queryStringParameters.username == `undefined`
     )
   ) return {
     statusCode: 500, 
     headers: {
       'Access-Control-Allow-Origin' : '*'
     }, 
-    body: `Must give the name, email, and number in the query string.`,
+    body: `Must give the name, email, and username in the query string.`,
     isBase64Encoded: false
   }
   const { user, error } = await getUser( 
     process.env.TABLE_NAME, new User( {
       name: event.queryStringParameters.name,
       email: event.queryStringParameters.email,
-      number: event.queryStringParameters.number,
+      number: event.queryStringParameters.username,
     } ) 
   ) 
   if ( error ) return{ 

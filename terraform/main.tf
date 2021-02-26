@@ -174,6 +174,8 @@ module "api_tos" {
 
 module "api_user" {
   source                       = "./API_user"
+  get_user_path                = "../code/lambda"
+  get_user_file_name           = "get_user"
   get_user_details_path        = "../code/lambda"
   get_user_details_file_name   = "get_user_details"
   developer                    = "Tyler Norlund"
