@@ -33,7 +33,7 @@ exports.handler = async ( event, context ) => {
     process.env.TABLE_NAME, new User( {
       name: event.queryStringParameters.name,
       email: event.queryStringParameters.email,
-      number: event.queryStringParameters.username,
+      username: event.queryStringParameters.username,
     } ) 
   ) 
   if ( error ) return{ 

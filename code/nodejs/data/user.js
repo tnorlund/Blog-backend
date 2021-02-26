@@ -29,6 +29,7 @@ const addUser = async ( tableName, user ) => {
     } ).promise()
     return { user, blog }
   } catch( error ) {
+    console.warn( `addUser`, error )
     return { 'error': `Could not add user to blog` }
   }
 }
@@ -50,6 +51,7 @@ const getUser = async ( tableName, user ) => {
     if ( !result.Item ) return { error: `User does not exist` }
     return { user: userFromItem( result.Item ) }
   } catch( error ) {
+    console.warn( `getUser`, error )
     let errorMessage = `Could not get user`
     if ( error.code == `ResourceNotFoundException` )
       errorMessage = `Table does not exist`
@@ -101,6 +103,7 @@ const getUserDetails = async ( tableName, user ) => {
     } )
     return { user: requestedUser, votes, tos, comments, follows }
   } catch( error ) {
+    console.warn( `getUserDetails`, error )
     let errorMessage = `Could not get user`
     if ( error.code == `ResourceNotFoundException` )
       errorMessage = `Table does not exist`
@@ -181,6 +184,7 @@ const updateUserName = async ( tableName, user, name ) => {
     user.name = name
     return user
   } catch( error ) { 
+    console.warn( `updateUserName`, error )
     console.log( `error`, error )
     return { 'error': `Could not update username` } 
   }
@@ -209,6 +213,7 @@ const incrementNumberUserFollows = async ( tableName, user ) => {
     } ).promise()
     return { 'user': userFromItem( response.Attributes ) }
   } catch( error ) {
+    console.warn( `incrementNumberUserFollows`, error )
     let errorMessage = `Could not increment project follows`
     if ( error.code === `ConditionalCheckFailedException` )
       errorMessage = `User does not exist`
@@ -241,6 +246,7 @@ const decrementNumberUserFollows = async ( tableName, user ) => {
     } ).promise()
     return { 'user': userFromItem( response.Attributes ) }
   } catch( error ) {
+    console.warn( `decrementNumberUserFollows`, error )
     let errorMessage = `Could not decrement project follows`
     if ( error.code === `ConditionalCheckFailedException` )
       errorMessage = `User does not exist`
@@ -273,6 +279,7 @@ const incrementNumberUserComments = async ( tableName, user ) => {
     } ).promise()
     return { 'user': userFromItem( response.Attributes ) }
   } catch( error ) {
+    console.warn( `incrementNumberUserComments`, error )
     let errorMessage = `Could not increment comments`
     if ( error.code === `ConditionalCheckFailedException` )
       errorMessage = `User does not exist`
@@ -305,6 +312,7 @@ const decrementNumberUserComments = async ( tableName, user ) => {
     } ).promise()
     return { 'user': userFromItem( response.Attributes ) }
   } catch( error ) {
+    console.warn( `decrementNumberUserComments`, error )
     let errorMessage = `Could not decrement comments`
     if ( error.code === `ConditionalCheckFailedException` )
       errorMessage = `User does not exist`
@@ -337,6 +345,7 @@ const incrementNumberUserVotes = async ( tableName, user ) => {
     } ).promise()
     return { 'user': userFromItem( response.Attributes ) }
   } catch( error ) {
+    console.warn( `incrementNumberUserVotes`, error )
     let errorMessage = `Could not increment votes`
     if ( error.code === `ConditionalCheckFailedException` )
       errorMessage = `User does not exist`
@@ -369,6 +378,7 @@ const decrementNumberUserVotes = async ( tableName, user ) => {
     } ).promise()
     return { 'user': userFromItem( response.Attributes ) }
   } catch( error ) {
+    console.warn( `decrementNumberUserVotes`, error )
     let errorMessage = `Could not decrement comments`
     if ( error.code === `ConditionalCheckFailedException` )
       errorMessage = `User does not exist`
