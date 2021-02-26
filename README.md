@@ -12,6 +12,7 @@ This repository contains the infrastructure as code for Tyler's blog.
 3. Run the terraform
 ```bash
 % cd terraform
+% terraform init
 % terraform apply -var="ipify_key=<API_KEY>"
 ```
 
