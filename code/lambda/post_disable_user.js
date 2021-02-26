@@ -1,6 +1,39 @@
 const { User, updateUserName, getUserDetails } = require( `/opt/nodejs/index` )
+const AWS = require( `aws-sdk` )
+const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider(
+  { apiVersion: `2016-04-18` }
+)
+let parsedBody
 
-// TODO Cognito Functions for disabling users
+/**
+ * Signs a user out of all sessions.
+ * @param {String} userName The user name of the user to sign out.
+ */
+const signUserOut = async ( userName ) => {
+  try {
+    await cognitoIdentityServiceProvider.adminUserGlobalSignOut( {
+      UserPoolId: process.env.USERPOOLID,
+      Username: userName,
+    } ).promise()
+    return { userName: userName }
+  } catch ( error ) { return { error: error } }
+}
+
+/**
+ * Disables a user from signing in.
+ * @param {String} userName The user name of the user to disable.
+ */
+const disableUser = async ( userName ) => {
+  try {
+    await cognitoIdentityServiceProvider.adminDisableUser( {
+      UserPoolId: process.env.USERPOOLID,
+      Username: userName,
+    } ).promise()
+    return { userName: userName }
+  } catch ( error ) {
+    return { error: error }
+  }
+}
 
 /**
  * Getting the basic blog details.
@@ -18,7 +51,7 @@ exports.handler = async ( event, context ) => {
     isBase64Encoded: false
   } 
   try {
-    const parsedBody = JSON.parse( event.body )
+    parsedBody = JSON.parse( event.body )
   } catch( error ) {
     return {
       statusCode: 500, 
@@ -31,10 +64,7 @@ exports.handler = async ( event, context ) => {
   }
 
   if (
-    typeof parsedBody.userNumber == `undefined` ||
-    typeof parsedBody.name == `undefined` ||
-    typeof parsedBody.email == `undefined` ||
-    typeof parsedBody.newName == `undefined`
+    typeof parsedBody.username == `undefined`
   ) return {
     statusCode: 500, 
     headers: { 'Access-Control-Allow-Origin' : '*' }, 
@@ -42,26 +72,26 @@ exports.handler = async ( event, context ) => {
     isBase64Encoded: false
   }
   
-  console.log( event )
-  const { user, error } = await getUserDetails( 
-    process.env.TABLE_NAME, 
-    new User( {
-      name: parsedBody.name,
-      email: parsedBody.email,
-      userNumber: parsedBody.userNumber
-    } ),
-    parsedBody.newName
-  ) 
-  if ( error ) return { 
+  const { error: disable_error } = await disableUser( parsedBody.username )
+  if ( disable_error ) return { 
     statusCode: 500, 
     headers: { 'Access-Control-Allow-Origin' : '*' }, 
-    body: JSON.stringify( error ), 
+    body: JSON.stringify( disable_error ), 
     isBase64Encoded: false
   }
+
+  const { error: sign_out_error } = await signUserOut( parsedBody.username )
+  if ( sign_out_error ) return { 
+    statusCode: 500, 
+    headers: { 'Access-Control-Allow-Origin' : '*' }, 
+    body: JSON.stringify( sign_out_error ), 
+    isBase64Encoded: false
+  }
+
   return { 
     statusCode: 200, 
     headers: { 'Access-Control-Allow-Origin' : '*' }, 
-    body: JSON.stringify( user ), 
+    body: `Disabled user`, 
     isBase64Encoded: false
   }
 };

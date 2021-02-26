@@ -31,6 +31,8 @@ data "aws_iam_policy_document" "lambda_policy_doc" {
       "dynamodb:UpdateItem",
       "dynamodb:GetRecords", 
       "cognito-idp:AdminUpdateUserAttributes",
+      "cognito-idp:adminUserGlobalSignOut",
+      "cognito-idp:adminDisableUser",
       "logs:CreateLogGroup",
       "logs:PutLogEvents",
       "logs:CreateLogStream"
@@ -242,5 +244,71 @@ resource "aws_lambda_function" "post_user_name" {
   }
   depends_on = [
     data.archive_file.post_user_name, 
+  ]
+}
+
+/**
+ * The API Gateway resource for disable user.
+ */
+resource "aws_api_gateway_resource" "disable_user" {
+  path_part = "disable-user"
+  parent_id   = var.api_gateway_root_resource_id
+  rest_api_id = var.api_gateway_id
+}
+module "cors_disable_user" {
+  source  = "squidfunk/api-gateway-enable-cors/aws"
+  version = "0.3.1"
+
+  api_id            = var.api_gateway_id
+  api_resource_id   = aws_api_gateway_resource.disable_user.id
+  allow_credentials = true
+}
+resource "aws_api_gateway_method" "post_disable_user" {
+  rest_api_id   = var.api_gateway_id
+  resource_id   = aws_api_gateway_resource.disable_user.id
+  http_method   = "POST"
+  authorization = "NONE"
+}
+resource "aws_api_gateway_integration" "post_disable_user" {
+  rest_api_id             = var.api_gateway_id
+  resource_id             = aws_api_gateway_resource.disable_user.id
+  http_method             = aws_api_gateway_method.post_disable_user.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.post_disable_user.invoke_arn
+}
+resource "aws_lambda_permission" "post_disable_user" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.post_disable_user.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${var.api_gateway_execution_arn}/*/${aws_api_gateway_method.post_disable_user.http_method}${aws_api_gateway_resource.disable_user.path}"
+}
+data "archive_file" "post_disable_user" {
+  type = "zip"
+  source_file = "${var.post_disable_user_path}/${var.post_disable_user_file_name}.js"
+  output_path = "${var.post_disable_user_path}/${var.post_disable_user_file_name}.zip"
+}
+resource "aws_lambda_function" "post_disable_user" {
+  filename         = "${var.post_disable_user_path}/${var.post_disable_user_file_name}.zip"
+  function_name    = var.post_disable_user_file_name
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "${var.post_disable_user_file_name}.handler"
+  source_code_hash = filebase64sha256("${var.post_disable_user_path}/${var.post_disable_user_file_name}.zip")
+  runtime          = "nodejs12.x"
+  timeout          = 10
+  layers           = [ var.node_layer_arn ]
+  description      = "GET the user details through the REST API"
+  environment {
+    variables = {
+      TABLE_NAME = var.table_name,
+      USERPOOLID = var.user_pool_id
+    }
+  }
+  tags = {
+    Name = var.developer
+  }
+  depends_on = [
+    data.archive_file.post_disable_user, 
   ]
 }

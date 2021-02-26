@@ -44,6 +44,16 @@ variable "post_user_name_file_name" {
   description = "The name of the file used in the GET Lambda function"
 }
 
+variable "post_disable_user_path" {
+  type = string
+  description = "The path to the file used in the GET Lambda Function"
+}
+
+variable "post_disable_user_file_name" {
+  type = string
+  description = "The name of the file used in the GET Lambda function"
+}
+
 variable "user_pool_arn" {
   type = string
   description = "value"
