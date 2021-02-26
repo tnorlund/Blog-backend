@@ -34,6 +34,26 @@ variable "get_user_details_file_name" {
   description = "The name of the file used in the GET Lambda function"
 }
 
+variable "post_user_name_path" {
+  type = string
+  description = "The path to the file used in the GET Lambda Function"
+}
+
+variable "post_user_name_file_name" {
+  type = string
+  description = "The name of the file used in the GET Lambda function"
+}
+
+variable "user_pool_arn" {
+  type = string
+  description = "value"
+}
+
+variable "user_pool_id" {
+  type = string
+  description = "value"
+}
+
 variable "api_gateway_root_resource_id" {
   type = string
   description = "The root resource ID of API Gateway"

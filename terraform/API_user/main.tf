@@ -30,13 +30,16 @@ data "aws_iam_policy_document" "lambda_policy_doc" {
       "dynamodb:Query",
       "dynamodb:UpdateItem",
       "dynamodb:GetRecords", 
+      "cognito-idp:AdminUpdateUserAttributes",
       "logs:CreateLogGroup",
       "logs:PutLogEvents",
       "logs:CreateLogStream"
     ]
     resources = [ 
       var.dynamo_arn,
-      "arn:aws:logs:*" 
+      "${var.dynamo_arn}/*",
+      "arn:aws:logs:*:*:*",
+      var.user_pool_arn,
     ]
     sid = "codecommitid"
   }
@@ -173,5 +176,71 @@ resource "aws_lambda_function" "get_user_details" {
   }
   depends_on = [
     data.archive_file.get_user_details, 
+  ]
+}
+
+/**
+ * The API Gateway resource for the user details.
+ */
+resource "aws_api_gateway_resource" "user_name" {
+  path_part = "user-name"
+  parent_id   = var.api_gateway_root_resource_id
+  rest_api_id = var.api_gateway_id
+}
+module "cors_user_name" {
+  source  = "squidfunk/api-gateway-enable-cors/aws"
+  version = "0.3.1"
+
+  api_id            = var.api_gateway_id
+  api_resource_id   = aws_api_gateway_resource.user_name.id
+  allow_credentials = true
+}
+resource "aws_api_gateway_method" "post_user_name" {
+  rest_api_id   = var.api_gateway_id
+  resource_id   = aws_api_gateway_resource.user_name.id
+  http_method   = "POST"
+  authorization = "NONE"
+}
+resource "aws_api_gateway_integration" "post_user_name" {
+  rest_api_id             = var.api_gateway_id
+  resource_id             = aws_api_gateway_resource.user_name.id
+  http_method             = aws_api_gateway_method.post_user_name.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.post_user_name.invoke_arn
+}
+resource "aws_lambda_permission" "post_user_name" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.post_user_name.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${var.api_gateway_execution_arn}/*/${aws_api_gateway_method.post_user_name.http_method}${aws_api_gateway_resource.user_name.path}"
+}
+data "archive_file" "post_user_name" {
+  type = "zip"
+  source_file = "${var.post_user_name_path}/${var.post_user_name_file_name}.js"
+  output_path = "${var.post_user_name_path}/${var.post_user_name_file_name}.zip"
+}
+resource "aws_lambda_function" "post_user_name" {
+  filename         = "${var.post_user_name_path}/${var.post_user_name_file_name}.zip"
+  function_name    = var.post_user_name_file_name
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "${var.post_user_name_file_name}.handler"
+  source_code_hash = filebase64sha256("${var.post_user_name_path}/${var.post_user_name_file_name}.zip")
+  runtime          = "nodejs12.x"
+  timeout          = 10
+  layers           = [ var.node_layer_arn ]
+  description      = "GET the user details through the REST API"
+  environment {
+    variables = {
+      TABLE_NAME = var.table_name,
+      USERPOOLID = var.user_pool_id
+    }
+  }
+  tags = {
+    Name = var.developer
+  }
+  depends_on = [
+    data.archive_file.post_user_name, 
   ]
 }

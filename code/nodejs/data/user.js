@@ -182,7 +182,7 @@ const updateUserName = async ( tableName, user, name ) => {
       }
     }
     user.name = name
-    return user
+    return { user }
   } catch( error ) { 
     console.warn( `updateUserName`, error )
     console.log( `error`, error )

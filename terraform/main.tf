@@ -178,7 +178,11 @@ module "api_user" {
   get_user_file_name           = "get_user"
   get_user_details_path        = "../code/lambda"
   get_user_details_file_name   = "get_user_details"
+  post_user_name_path          = "../code/lambda"
+  post_user_name_file_name     = "post_user_name"
   developer                    = "Tyler Norlund"
+  user_pool_id                 = module.identity.user_pool_id
+  user_pool_arn                = module.identity.user_pool_arn
   api_gateway_id               = module.identity.api_gateway_id
   api_gateway_execution_arn    = module.identity.api_gateway_execution_arn
   api_gateway_arn              = module.identity.api_gateway_arn
