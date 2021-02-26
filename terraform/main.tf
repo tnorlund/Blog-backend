@@ -90,30 +90,44 @@ module "api_blog" {
 }
 
 module "api_project" {
-  source                       = "./API_project"
-  get_path                     = "../code/lambda"
-  get_file_name                = "get_project"
-  get_details_path             = "../code/lambda"
-  get_details_file_name        = "get_project_details"
-  post_path                    = "../code/lambda"
-  post_file_name               = "post_project"
-  method_name                  = "getProject"
-  developer                    = "Tyler Norlund"
-  api_gateway_id               = module.identity.api_gateway_id
-  api_gateway_execution_arn    = module.identity.api_gateway_execution_arn
-  api_gateway_arn              = module.identity.api_gateway_arn
-  api_gateway_root_resource_id = module.identity.api_gateway_root_resource_id
-  table_name                   = module.analytics.dynamo_table_name
-  dynamo_arn                   = module.analytics.dynamo_arn
-  node_layer_arn               = module.node_layer.arn
+  source                        = "./API_project"
+  get_path                      = "../code/lambda"
+  get_file_name                 = "get_project"
+  get_details_path              = "../code/lambda"
+  get_details_file_name         = "get_project_details"
+  post_path                     = "../code/lambda"
+  post_file_name                = "post_project"
+  post_project_update_path      = "../code/lambda"
+  post_project_update_file_name = "post_project_update"
+  method_name                   = "getProject"
+  post_project_follow_path      = "../code/lambda"
+  post_project_follow_file_name = "post_project_follow"
+  delete_project_follow_path      = "../code/lambda"
+  delete_project_follow_file_name = "delete_project_follow"
+  delete_project_path           = "../code/lambda"
+  delete_project_file_name      = "delete_project"
+  developer                     = "Tyler Norlund"
+  api_gateway_id                = module.identity.api_gateway_id
+  api_gateway_execution_arn     = module.identity.api_gateway_execution_arn
+  api_gateway_arn               = module.identity.api_gateway_arn
+  api_gateway_root_resource_id  = module.identity.api_gateway_root_resource_id
+  table_name                    = module.analytics.dynamo_table_name
+  dynamo_arn                    = module.analytics.dynamo_arn
+  node_layer_arn                = module.node_layer.arn
 }
 
 module "api_comment" {
   source                       = "./API_comment"
   post_comment_path            = "../code/lambda"
   post_comment_file_name       = "post_comment"
+  delete_comment_path            = "../code/lambda"
+  delete_comment_file_name       = "delete_comment"
   post_reply_path              = "../code/lambda"
   post_reply_file_name         = "post_reply"
+  post_vote_path               = "../code/lambda"
+  post_vote_file_name          = "post_vote"
+  delete_vote_path             = "../code/lambda"
+  delete_vote_file_name        = "delete_vote"
   developer                    = "Tyler Norlund"
   api_gateway_id               = module.identity.api_gateway_id
   api_gateway_execution_arn    = module.identity.api_gateway_execution_arn
@@ -130,6 +144,8 @@ module "api_post" {
   post_post_file_name          = "post_post"
   get_post_path                = "../code/lambda"
   get_post_file_name           = "get_post"
+  delete_post_path                = "../code/lambda"
+  delete_post_file_name           = "delete_post"
   get_post_details_path        = "../code/lambda"
   get_post_details_file_name   = "get_post_details"
   developer                    = "Tyler Norlund"
@@ -178,8 +194,10 @@ module "api_deployment" {
     module.api_project.integrations,
     module.api_comment.integrations,
     module.api_post.integrations,
-    module.api_tos.integrations
+    module.api_tos.integrations,
+    module.api_user.integrations,
   )
+  depends_on = [ module.api_comment.methods ]
 }
 
 output "GATSBY_API_BLOG_ENDPOINT" {
@@ -217,7 +235,3 @@ output "GATSBY_ANALYTICS_REGION" {
 output "GATSBY_API_BLOG_NAME" {
   value = var.api_name
 }
-
-# output "GATSBY_API_BLOG_ENDPOINT" {
-#   value = module.api_project.aws_api_gateway_resource
-# }

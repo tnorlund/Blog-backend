@@ -39,6 +39,7 @@ const addProject = async ( tableName, project ) => {
     } ).promise()
     return { project }
   } catch( error ) {
+    console.warn( `addProject`, error )
     let errorMessage = `Could not add project to blog`
     if ( error.code === `TransactionCanceledException` )
       errorMessage = `Could not add '${project.title}' to table`
@@ -65,6 +66,7 @@ const getProject = async ( tableName, project ) => {
     if ( !result.Item ) return { error: `Project does not exist` }
     else return { project: projectFromItem( result.Item ) }
   } catch( error ) {
+    console.warn( `getProject`, error )
     let errorMessage = `Could not get project`
     if ( error.code == `ResourceNotFoundException` )
       errorMessage = `Table does not exist`
@@ -107,6 +109,7 @@ const getProjectDetails = async ( tableName, project ) => {
     } )
     return project_details
   } catch( error ) {
+    console.warn( `getProjectDetails`, error )
     let errorMessage = `Could not get project details`
     if ( error.code == `ResourceNotFoundException` )
       errorMessage = `Table does not exist`
@@ -135,6 +138,7 @@ const updateProject = async ( tableName, project ) => {
       project: project
     }
   } catch( error ) {
+    console.warn( `updateProject`, error )
     let errorMessage = `Could not update the project`
     if ( error.code === `ConditionalCheckFailedException` )
       errorMessage = `Project does not exist`
@@ -205,6 +209,7 @@ const removeProject = async ( tableName, project ) => {
     }
     return project_details
   } catch( error ) {
+    console.warn( `removeProject`, error )
     return { 'error': `Could not remove project` }
   }
 }
@@ -260,6 +265,7 @@ const decrementNumberProjectFollows = async ( tableName, project ) => {
     } ).promise()
     return { 'project': projectFromItem( response.Attributes ) }
   } catch( error ) {
+    console.warn( `decrementNumberProjectFollows`, error )
     let errorMessage = `Could not decrement number of project follows`
     if ( error.code === `ConditionalCheckFailedException` )
       errorMessage = `Project does not exist`

@@ -19,7 +19,7 @@ exports.handler = async ( event, context ) => {
     !event.queryStringParameters || (
       typeof event.queryStringParameters.name == `undefined` ||
       typeof event.queryStringParameters.email == `undefined` ||
-      typeof event.queryStringParameters.number == `undefined`
+      typeof event.queryStringParameters.username == `undefined`
     )
   ) return {
     statusCode: 500, 
@@ -29,11 +29,13 @@ exports.handler = async ( event, context ) => {
     body: `Must give the name, email, and number in the query string.`,
     isBase64Encoded: false
   }
-  const { user, error } = await getUserDetails( 
+  const { 
+    user, tos, follows, comments, votes, error 
+  } = await getUserDetails( 
     process.env.TABLE_NAME, new User( {
       name: event.queryStringParameters.name,
       email: event.queryStringParameters.email,
-      userNumber: event.queryStringParameters.number,
+      username: event.queryStringParameters.username,
     } ) 
   ) 
   if ( error ) return{ 
@@ -49,7 +51,7 @@ exports.handler = async ( event, context ) => {
     headers: {
       'Access-Control-Allow-Origin' : '*'
     }, 
-    body: JSON.stringify( { user } ), 
+    body: JSON.stringify( { user, tos, follows, comments, votes } ), 
     isBase64Encoded: false
   }
 };

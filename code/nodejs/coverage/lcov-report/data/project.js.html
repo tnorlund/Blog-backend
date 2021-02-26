@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">96.58% </span>
+                <span class="strong">95.93% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>113/117</span>
+                <span class='fraction'>118/123</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">96.33% </span>
+                <span class="strong">95.65% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>105/109</span>
+                <span class='fraction'>110/115</span>
             </div>
         
             
@@ -331,7 +331,13 @@
 <a name='L272'></a><a href='#L272'>272</a>
 <a name='L273'></a><a href='#L273'>273</a>
 <a name='L274'></a><a href='#L274'>274</a>
-<a name='L275'></a><a href='#L275'>275</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">13x</span>
+<a name='L275'></a><a href='#L275'>275</a>
+<a name='L276'></a><a href='#L276'>276</a>
+<a name='L277'></a><a href='#L277'>277</a>
+<a name='L278'></a><a href='#L278'>278</a>
+<a name='L279'></a><a href='#L279'>279</a>
+<a name='L280'></a><a href='#L280'>280</a>
+<a name='L281'></a><a href='#L281'>281</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -374,6 +380,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -398,6 +405,7 @@
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -444,6 +452,7 @@
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -468,6 +477,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -538,6 +548,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -595,6 +606,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -646,6 +658,7 @@ const addProject = async ( tableName, project ) =&gt; {
     } ).promise()
     return { project }
   } catch( error ) {
+    console.warn( `addProject`, error )
     let errorMessage = `Could not add project to blog`
     if ( error.code === `TransactionCanceledException` )
       errorMessage = `Could not add '${project.title}' to table`
@@ -672,6 +685,7 @@ const getProject = async ( tableName, project ) =&gt; {
     if ( !result.Item ) return { error: `Project does not exist` }
     else return { project: projectFromItem( result.Item ) }
   } catch( error ) {
+    console.warn( `getProject`, error )
     let errorMessage = `Could not get project`
     <span class="missing-if-branch" title="else path not taken" >E</span>if ( error.code == `ResourceNotFoundException` )
       errorMessage = `Table does not exist`
@@ -714,6 +728,7 @@ const getProjectDetails = async ( tableName, project ) =&gt; {
     } )
     return project_details
   } catch( error ) {
+    console.warn( `getProjectDetails`, error )
     let errorMessage = `Could not get project details`
     <span class="missing-if-branch" title="else path not taken" >E</span>if ( error.code == `ResourceNotFoundException` )
       errorMessage = `Table does not exist`
@@ -742,6 +757,7 @@ const updateProject = async ( tableName, project ) =&gt; {
       project: project
     }
   } catch( error ) {
+    console.warn( `updateProject`, error )
     let errorMessage = `Could not update the project`
     if ( error.code === `ConditionalCheckFailedException` )
       errorMessage = `Project does not exist`
@@ -812,6 +828,7 @@ const removeProject = async ( tableName, project ) =&gt; {
     }
     return project_details
   } catch( error ) {
+<span class="cstat-no" title="statement not covered" >    console.warn( `removeProject`, error )</span>
 <span class="cstat-no" title="statement not covered" >    return { 'error': `Could not remove project` }</span>
   }
 }
@@ -867,6 +884,7 @@ const decrementNumberProjectFollows = async ( tableName, project ) =&gt; {
     } ).promise()
     return { 'project': projectFromItem( response.Attributes ) }
   } catch( error ) {
+    console.warn( `decrementNumberProjectFollows`, error )
     let errorMessage = `Could not decrement number of project follows`
     if ( error.code === `ConditionalCheckFailedException` )
       errorMessage = `Project does not exist`
@@ -886,7 +904,7 @@ module.exports = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
-                at Tue Feb 23 2021 13:27:26 GMT-0800 (Pacific Standard Time)
+                at Thu Feb 25 2021 20:20:10 GMT-0800 (Pacific Standard Time)
             </div>
         </div>
         <script src="../prettify.js"></script>

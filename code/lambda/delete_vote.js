@@ -1,4 +1,4 @@
-const { User, Post, Comment, addVote } = require( `/opt/nodejs/index` )
+const { Comment, Vote, removeVote } = require( `/opt/nodejs/index` )
 
 let parsedBody
 
@@ -31,43 +31,47 @@ exports.handler = async ( event, context ) => {
   }
 
   if (
-    typeof parsedBody.name == `undefined` ||
-    typeof parsedBody.email == `undefined` ||
-    typeof parsedBody.username == `undefined` ||
     typeof parsedBody.slug == `undefined` ||
+    typeof parsedBody.name == `undefined` ||
+    typeof parsedBody.username == `undefined` ||
     typeof parsedBody.commentDateAdded == `undefined` ||
-    typeof parsedBody.up == `undefined` ||
-    typeof parsedBody.replyChain == `undefined`
+    typeof parsedBody.voteDateAdded == `undefined` || 
+    typeof parsedBody.up == `undefined`
   ) return {
     statusCode: 500,
     headers: { 'Access-Control-Allow-Origin' : '*' },
-    body: `Must give the slug and the title in the body.`,
+    body: JSON.stringify( 
+      `Must give the slug, name, username, and the comment details in the body.`
+    ),
     isBase64Encoded: false
   }
 
-  const { vote, error } = await addVote(
+  const { comment, error } = await removeVote(
     process.env.TABLE_NAME,
-    new User( {
-      name: parsedBody.name,
-      email: parsedBody.email,
-      username: parsedBody.username
-    } ),
-    new Post( {
-      slug: parsedBody.slug,
-      title: `something`
-    } ),
     new Comment( {
       username: parsedBody.username,
       userCommentNumber: `0`,
       name: parsedBody.name,
       slug: parsedBody.slug,
-      text: ` `,
-      vote: `0`,
-      numberVotes: `0`,
+      text: ``,
+      vote: 0,
+      numberVotes: 0,
       dateAdded: parsedBody.commentDateAdded,
-      replyChain: parsedBody.replyChain
+      replyChain: typeof parsedBody.replyChain == `undefined` ?
+        [] : parsedBody.replyChain
     } ),
-    parsedBody.up
+    new Vote( {
+      username: parsedBody.username,
+      name: parsedBody.name,
+      slug: parsedBody.slug,
+      voteNumber: `0`,
+      up: parsedBody.up,
+      replyChain: [ parsedBody.commentDateAdded ],
+      dateAdded: parsedBody.voteDateAdded
+      // replyChain: typeof parsedBody.replyChain == `undefined` ?
+      //   [ parsedBody.voteDateAdded ] :
+      //   parsedBody.replyChain.concat( [ parsedBody.voteDateAdded ] )
+    } )
   )
   if ( error ) return {
     statusCode: 500,
@@ -78,7 +82,7 @@ exports.handler = async ( event, context ) => {
   return {
     statusCode: 200,
     headers: { 'Access-Control-Allow-Origin' : '*' },
-    body: JSON.stringify( vote ),
+    body: JSON.stringify( comment ),
     isBase64Encoded: false
   }
 };

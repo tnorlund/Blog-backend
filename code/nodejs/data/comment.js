@@ -4,9 +4,7 @@ const {
   incrementNumberUserComments, incrementNumberUserVotes 
 } = require( `./user` )
 const { 
-  aggregateData, 
-  aggregateDataToTransact, 
-  executeTransactWrite 
+  aggregateData, aggregateDataToTransact, executeTransactWrite 
 } = require( `./utils` )
 const { incrementNumberPostComments, getPostDetails } = require( `./post` )
 const { Comment, Vote, commentFromItem, Post } = require( `../entities` )
@@ -100,6 +98,7 @@ const addComment = async ( tableName, user, post, text, replyChain ) => {
     await executeTransactWrite( { client: dynamoDB, params } )
     return { comment, vote }
   } catch ( error ) {
+    console.warn( `addComment`, error )
     let errorMessage = `Could not add comment to post`
     if ( error.code == `ConditionalCheckFailedException` )
       errorMessage = `Comment already in database`
@@ -124,6 +123,7 @@ const getComment = async ( tableName, comment ) => {
     if ( !result.Item ) return { error: `Comment does not exist` }
     else return { comment: commentFromItem( result.Item ) }
   } catch( error ) {
+    console.warn( `getComment`, error )
     let errorMessage = `Could not get comment`
     if ( error.code == `ResourceNotFoundException` )
       errorMessage = `Table does not exist`
@@ -185,6 +185,7 @@ const removeComment = async ( tableName, comment ) => {
     }
     return comment
   } catch( error ) {
+    console.warn( `removeComment`, error )
     return { 'error': `Could not remove comment` }
   }
 }
@@ -231,6 +232,7 @@ const incrementNumberCommentVotes = async ( tableName, comment ) => {
     comment.numberVotes = parseInt( response.Attributes.NumberVotes.N )
     return { comment }
   } catch( error ) {
+    console.warn( `incrementNumberCommentVotes`, error )
     let errorMessage = `Could not increment the number of votes the comment `
     + `has`
     if ( error.code === `ConditionalCheckFailedException` )
@@ -267,6 +269,7 @@ const decrementNumberCommentVotes = async ( tableName, comment ) => {
     comment.numberVotes = parseInt( response.Attributes.NumberVotes.N )
     return { comment }
   } catch( error ) {
+    console.warn( `decrementNumberCommentVotes`, error )
     let errorMessage = `Could not decrement the number of votes the comment `
     + `has`
     if ( error.code === `ConditionalCheckFailedException` )
@@ -303,6 +306,7 @@ const incrementCommentVote = async ( tableName, comment ) => {
     comment.vote = parseInt( response.Attributes.Vote.N )
     return { comment }
   } catch( error ) {
+    console.warn( `incrementCommentVote`, error )
     let errorMessage = `Could not increment the number of votes the comment `
     + `has`
     if ( error.code === `ConditionalCheckFailedException` )
@@ -339,6 +343,7 @@ const decrementCommentVote = async ( tableName, comment ) => {
     comment.vote = parseInt( response.Attributes.Vote.N )
     return { comment }
   } catch( error ) {
+    console.warn( `decrementCommentVote`, error )
     let errorMessage = `Could not decrement the number of votes the comment `
     + `has`
     if ( error.code === `ConditionalCheckFailedException` )

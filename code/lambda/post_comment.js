@@ -1,5 +1,7 @@
 const { Post, User, addComment } = require( `/opt/nodejs/index` )
 
+let parsedBody
+
 /**
  * Getting the basic blog details.
  *
@@ -16,7 +18,7 @@ exports.handler = async ( event, context ) => {
     isBase64Encoded: false
   } 
   try {
-    const parsedBody = JSON.parse( event.body )
+    parsedBody = JSON.parse( event.body )
   } catch( error ) {
     return {
       statusCode: 500, 
@@ -34,7 +36,7 @@ exports.handler = async ( event, context ) => {
     typeof parsedBody.title == `undefined` ||
     typeof parsedBody.name == `undefined` ||
     typeof parsedBody.email == `undefined` ||
-    typeof parsedBody.userNumber == `undefined`
+    typeof parsedBody.username == `undefined`
   ) return {
     statusCode: 500, 
     headers: { 'Access-Control-Allow-Origin' : '*' }, 
@@ -47,7 +49,7 @@ exports.handler = async ( event, context ) => {
     new User( {
      name: parsedBody.name,
      email: parsedBody.email,
-     userNumber: parsedBody.userNumber
+     username: parsedBody.username
     } ),
     new Post( {
       slug: parsedBody.slug,

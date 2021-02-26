@@ -34,6 +34,46 @@ variable "get_details_file_name" {
   description = "The name of the file used in the GET project details Lambda function"
 }
 
+variable "post_project_update_path" {
+  type = string
+  description = "The path to the file used in the POST project update Lambda Function"
+}
+
+variable "post_project_update_file_name" {
+  type = string
+  description = "The name of the file file used in the POST project update Lambda Function"
+}
+
+variable "post_project_follow_path" {
+  type = string
+  description = "The path to the file used in the POST project follow Lambda Function"
+}
+
+variable "post_project_follow_file_name" {
+  type = string
+  description = "The name of the file file used in the POST project follow Lambda Function"
+}
+
+variable "delete_project_follow_path" {
+  type = string
+  description = "The path to the file used in the DELETE project follow Lambda Function"
+}
+
+variable "delete_project_follow_file_name" {
+  type = string
+  description = "The name of the file file used in the DELETE project follow Lambda Function"
+}
+
+variable "delete_project_path" {
+  type = string
+  description = "The path to the file used in the DELETE project Lambda Function"
+}
+
+variable "delete_project_file_name" {
+  type = string
+  description = "The name of the file file used in the DELETE project Lambda Function"
+}
+
 variable "post_path" {
   type = string
   description = "The path to the file used in the POST Lambda Function"

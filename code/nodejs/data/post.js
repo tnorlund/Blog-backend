@@ -41,6 +41,7 @@ const addPost = async ( tableName, post ) => {
     } ).promise()
     return { post }
   } catch( error ) {
+    console.warn( `addPost`, error )
     let errorMessage = `Could not add post to blog`
     if ( error.code === `TransactionCanceledException` )
       errorMessage = `Could not add '${post.title}' to table`
@@ -97,6 +98,7 @@ const getPostDetails = async ( tableName, post ) => {
     } )
     return { post: requestedPost, comments }
   } catch( error ) {
+    console.warn( `getPostDetails`, error )
     let errorMessage = `Could not get post details`
     if ( error.code == `ResourceNotFoundException` )
       errorMessage = `Table does not exist`
@@ -188,9 +190,9 @@ const removePost = async ( tableName, post ) => {
         } ).promise()
       }
     }
-    return post
+    return { post }
   } catch( error ) { 
-    console.log( `error`, error )
+    console.warn( `removePost`, error )
     return { 'error': `Could not remove post` } 
   }
 }
@@ -221,6 +223,7 @@ const incrementNumberPostComments = async ( tableName, post ) => {
       numberComments: response.Attributes.NumberComments.N
     } ) }
   } catch( error ) {
+    console.warn( `incrementNumberPostComments`, error )
     let errorMessage = `Could not increment number of post comments`
     if ( error.code === `ConditionalCheckFailedException` )
       errorMessage = `Post does not exist`
@@ -256,6 +259,7 @@ const decrementNumberPostComments = async ( tableName, post ) => {
       numberComments: response.Attributes.NumberComments.N
     } ) }
   } catch( error ) {
+    console.warn( `decrementNumberPostComments`, error )
     let errorMessage = `Could not decrement number of post comments`
     if ( error.code === `ConditionalCheckFailedException` )
       errorMessage = `Post does not exist`

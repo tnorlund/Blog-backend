@@ -2,7 +2,6 @@ variable "integrations" {
   type = list( string )
 }
 
-
 variable "stage" {
   type = string
   default = "dev"

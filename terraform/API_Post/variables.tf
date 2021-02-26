@@ -34,6 +34,16 @@ variable "get_post_file_name" {
   description = "The name of the file used in the GET post Lambda function"
 }
 
+variable "delete_post_path" {
+  type = string
+  description = "The path to the GET post Lambda Function file"
+}
+
+variable "delete_post_file_name" {
+  type = string
+  description = "The name of the file used in the GET post Lambda function"
+}
+
 variable "get_post_details_path" {
   type = string
   description = "The path to the GET post Lambda Function file"

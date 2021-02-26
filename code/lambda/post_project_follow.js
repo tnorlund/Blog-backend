@@ -1,4 +1,6 @@
-const { Project, User, addFollowToProject } = require( `/opt/nodejs/index` )
+const { Project, User, addProjectFollow } = require( `/opt/nodejs/index` )
+
+let parsedBody
 
 /**
  * Getting the basic blog details.
@@ -33,7 +35,7 @@ exports.handler = async ( event, context ) => {
     typeof parsedBody.title == `undefined` ||
     typeof parsedBody.name == `undefined` ||
     typeof parsedBody.email == `undefined` ||
-    typeof parsedBody.userNumber == `undefined`
+    typeof parsedBody.username == `undefined`
   ) return {
     statusCode: 500, 
     headers: { 'Access-Control-Allow-Origin' : '*' }, 
@@ -41,12 +43,12 @@ exports.handler = async ( event, context ) => {
     isBase64Encoded: false
   }
   
-  const { projectFollow, error } = await addFollowToProject( 
+  const { projectFollow, error } = await addProjectFollow( 
     process.env.TABLE_NAME, 
     new User( {
       name: parsedBody.name,
       email: parsedBody.email,
-      userNumber: parsedBody.userNumber
+      username: parsedBody.username
     } ),
    new Project( {
      slug: parsedBody.slug,

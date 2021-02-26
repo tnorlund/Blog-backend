@@ -28,7 +28,7 @@ exports.handler = async ( event, context ) => {
     }
   }
   if (
-    typeof parsedBody.userNumber == `undefined` ||
+    typeof parsedBody.username == `undefined` ||
     typeof parsedBody.name == `undefined` ||
     typeof parsedBody.email == `undefined` ||
     typeof parsedBody.version == `undefined`
@@ -43,7 +43,7 @@ exports.handler = async ( event, context ) => {
     new User( {
       name: parsedBody.name,
       email: parsedBody.email,
-      userNumber: parsedBody.userNumber
+      username: parsedBody.username
     } ),
     parsedBody.version
   ) 

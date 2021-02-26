@@ -46,6 +46,9 @@ resource "aws_cognito_user_pool" "main" {
     custom_message    = aws_lambda_function.custom_message.arn
     post_confirmation = aws_lambda_function.post_confirmation.arn
   }
+  lifecycle {
+    ignore_changes = [ schema ]
+  }
 }
 
  resource "aws_cognito_user_pool_client" "client" {

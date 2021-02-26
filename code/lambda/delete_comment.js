@@ -1,4 +1,4 @@
-const { Post, User, addComment } = require( `/opt/nodejs/index` )
+const { Comment, removeComment } = require( `/opt/nodejs/index` )
 
 let parsedBody
 
@@ -31,34 +31,30 @@ exports.handler = async ( event, context ) => {
   }
 
   if (
-    typeof parsedBody.name == `undefined` ||
-    typeof parsedBody.email == `undefined` ||
-    typeof parsedBody.username == `undefined` ||
-    typeof parsedBody.text == `undefined` ||
-    typeof parsedBody.replyChain == `undefined` ||
     typeof parsedBody.slug == `undefined` ||
-    typeof parsedBody.title == `undefined`
+    typeof parsedBody.name == `undefined` ||
+    typeof parsedBody.username == `undefined` || 
+    typeof parsedBody.dateAdded == `undefined`
   ) return {
     statusCode: 500, 
     headers: { 'Access-Control-Allow-Origin' : '*' }, 
-    body: `Must give the slug and the title in the body.`,
+    body: `Must give the post's slug, the user's name and username in the body.`,
     isBase64Encoded: false
   }
   
-  console.log( { parsedBody } )
-  const { comment, vote, error } = await addComment( 
+  const { comment, error } = await removeComment( 
     process.env.TABLE_NAME, 
-    new User( {
-     name: parsedBody.name,
-     email: parsedBody.email,
-     username: parsedBody.username
-    } ),
-    new Post( {
+    new Comment( {
+      username: parsedBody.username,
+      userCommentNumber: `0`,
+      name: parsedBody.name,
       slug: parsedBody.slug,
-      title: parsedBody.title
-    } ),
-    parsedBody.text,
-    parsedBody.replyChain
+      text: ``,
+      vote: 0,
+      numberVotes: 0,
+      dateAdded: parsedBody.dateAdded,
+      replyChain: typeof parsedBody.replyChain == `undefined` ? [] : parsedBody.replyChain
+    } )
   ) 
   if ( error ) return { 
     statusCode: 500, 
@@ -69,7 +65,7 @@ exports.handler = async ( event, context ) => {
   return { 
     statusCode: 200, 
     headers: { 'Access-Control-Allow-Origin' : '*' }, 
-    body: JSON.stringify( { comment, vote } ), 
+    body: JSON.stringify( comment ), 
     isBase64Encoded: false
   }
 };

@@ -83,6 +83,7 @@ const addVote = async ( tableName, user, post, comment, up ) => {
     } ).promise()
     return { vote }
   } catch( error ) {
+    console.warn( `addVote`, error )
     return { 'error': `Could not add vote to comment` }
   }
 }
@@ -144,6 +145,7 @@ const removeVote = async ( tableName, comment, vote ) => {
     } ).promise()
     return { vote }
   } catch( error ) {
+    console.warn( `removeVote`, error )
     return { error: `Could not remove vote` }
   }
 }

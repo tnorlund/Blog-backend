@@ -28,7 +28,7 @@ exports.handler = async ( event, context ) => {
     body: `Must give the post's slug and title in the query string.`,
     isBase64Encoded: false
   }
-  const { user, error } = await getPostDetails( 
+  const { post, comments, error } = await getPostDetails( 
     process.env.TABLE_NAME, new Post( {
       title: event.queryStringParameters.title,
       slug: event.queryStringParameters.slug
@@ -47,7 +47,7 @@ exports.handler = async ( event, context ) => {
     headers: {
       'Access-Control-Allow-Origin' : '*'
     }, 
-    body: JSON.stringify( { user } ), 
+    body: JSON.stringify( { post, comments } ), 
     isBase64Encoded: false
   }
 };

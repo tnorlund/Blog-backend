@@ -5,6 +5,7 @@ resource "aws_s3_bucket_object" "object" {
   bucket = var.bucket_name
   key    = var.type == "nodejs" ? "nodejs.zip" : "python.zip"
   source = var.type == "nodejs" ? "${var.path}/nodejs.zip" : "${var.path}/python.zip"
+  etag   = var.type == "nodejs" ? filemd5("${var.path}/nodejs.zip") : filemd5("${var.path}/python.zip")
   tags = {
     Project   = "Blog"
     Stage     = var.stage
@@ -20,5 +21,6 @@ resource "aws_lambda_layer_version" "layer" {
 
   description = var.type == "nodejs" ? "Node Framework used to access DynamoDB" : "Python Framework used to access DynamoDB"
   compatible_runtimes = var.type == "nodejs" ? ["nodejs12.x"] : ["python3.8"]
+  source_code_hash = var.type == "nodejs" ? filebase64sha256("${var.path}/nodejs.zip") : filebase64sha256("${var.path}/python.zip")
 }
 

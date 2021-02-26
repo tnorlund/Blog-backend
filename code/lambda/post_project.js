@@ -1,5 +1,7 @@
 const { Project, addProject } = require( `/opt/nodejs/index` )
 
+let parsedBody
+
 /**
  * Getting the basic blog details.
  *
@@ -16,7 +18,7 @@ exports.handler = async ( event, context ) => {
     isBase64Encoded: false
   } 
   try {
-    const parsedBody = JSON.parse( event.body )
+    parsedBody = JSON.parse( event.body )
   } catch( error ) {
     return {
       statusCode: 500, 

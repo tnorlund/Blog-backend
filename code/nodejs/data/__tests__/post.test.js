@@ -128,7 +128,7 @@ describe( `removePost`, () => {
       `test-table`, user, post, `This is a reply`, [comment.dateAdded]
     )
     result = await removePost( `test-table`, post )
-    expect( result ).toEqual( post )
+    expect( result ).toEqual( { post } )
     result = await getPostDetails( `test-table`, post )
     expect( result ).toEqual( { 'error': `Post does not exist` } )
   } )
