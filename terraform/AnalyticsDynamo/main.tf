@@ -101,11 +101,7 @@ data "aws_iam_policy_document" "lambda_policy_doc" {
     sid = "codecommitid"
   }
 }
-# data "archive_file" "dynamo" {
-#   type        = "zip"
-#   source_file = "${var.dynamo_path}/${var.dynamo_file_name}.js"
-#   output_path = "${var.dynamo_path}/${var.dynamo_file_name}.zip"
-# }
+
 resource "aws_iam_role" "lambda_role" {
   name               = "iam_dynamo_stream"
   assume_role_policy = <<EOF
@@ -179,12 +175,6 @@ resource "aws_s3_bucket" "bucket" {
   }
 }
 
-# Create a Lambda function to process the S3 bucket put objects
-# data "archive_file" "s3" {
-#   type = "zip"
-#   source_file = "${var.s3_path}/${var.s3_file_name}.py"
-#   output_path = "${var.s3_path}/${var.s3_file_name}.zip"
-# }
 data "aws_iam_policy_document" "s3" {
   statement {
     effect = "Allow"
@@ -300,11 +290,7 @@ data "aws_iam_policy_document" "kinesis" {
     sid = "lambdaKinesisProcessor"
   }
 }
-# data "archive_file" "kinesis" {
-#   type = "zip"
-#   source_file = "${var.kinesis_path}/${var.kinesis_file_name}.js"
-#   output_path = "${var.kinesis_path}/${var.kinesis_file_name}.zip"
-# }
+
 resource "aws_iam_role" "kinesis" {
    name = "kinesis_process_role"
 

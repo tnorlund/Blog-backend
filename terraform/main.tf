@@ -71,7 +71,7 @@ module "node_layer" {
  * Functions used with them.
  */
 module "analytics" {
-  source           = "./Analytics"
+  source           = "./AnalyticsDynamo"
   developer        = "Tyler Norlund"
   bucket_name      = "tf-cloud"
   table_name       = "Blog"
