@@ -26,7 +26,7 @@ if ( ! test -f "../python.zip" ) || ( ! test -f "../nodejs.zip" ); then
   mkdir ../python/lib/python3.8/site-packages
 
   # Move the unpacked packages into the correct location
-  for i in */; do 
+  for i in $(ls -d */); do 
     for j in $(ls $i); do
       mv -f "$i/$j" ../python/lib/python3.8/site-packages;
     done
