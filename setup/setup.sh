@@ -19,10 +19,7 @@ if ( ! test -f "../python.zip" ) || ( ! test -f "../nodejs.zip" ); then
 
   # Unpack all of the wheels
   for i in *.whl; do
-    python -m wheel unpack "$i"
-    # python -m wheel unpack "$i" &> /dev/null;
-    # echo "Unpacked wheel $i here"
-    # ls .
+    python -m wheel unpack "$i" &> /dev/null;
     rm $i;
   done
 
@@ -31,10 +28,6 @@ if ( ! test -f "../python.zip" ) || ( ! test -f "../nodejs.zip" ); then
   mkdir ../python/lib;
   mkdir ../python/lib/python3.8
   mkdir ../python/lib/python3.8/site-packages
-
-  echo 'Is everything unpacked?'
-  ls 
-  ls -d */
 
   # Move the unpacked packages into the correct location
   for i in $(ls -d */); do  
