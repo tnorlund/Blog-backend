@@ -86,9 +86,7 @@ jobs:
 
       - name: Terraform Format
         id: fmt
-        run: |
-          cd terraform/
-          terraform fmt -check
+        run: terraform fmt -check terraform/
         continue-on-error: true
 
       - name: Terraform Initialize
@@ -101,7 +99,9 @@ jobs:
         id: plan
         if: github.event_name == 'pull_request'
         run: |
-          cd terraform/
+          ls
+          cd terraform
+          ls
           terraform plan -no-color
         continue-on-error: true
 
