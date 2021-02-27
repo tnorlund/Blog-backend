@@ -46,9 +46,23 @@ jobs:
       run: |
         cd code/nodejs/
         npm test
-  Terraform:
+  S3-Sync:
     runs-on: ubuntu-18.04
     needs: Unit-Tests
+    steps:
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+    - name: Copy Lambda Layers to S3
+      run: |
+        aws s3 cp ./python.zip s3://tf-cloud
+        aws s3 cp ./python.zip s3://tf-cloud
+  Terraform:
+    runs-on: ubuntu-18.04
+    needs: [ Unit-Tests, S3-Sync ]
     steps:
       - uses: actions/checkout@v2
       - name: Setup Terraform

@@ -1,26 +1,28 @@
 # Adds a NodeJS or Python Lambda Layer
 
 # Upload the compressed code to the S3 bucket
-resource "aws_s3_bucket_object" "object" {
-  bucket = var.bucket_name
-  key    = var.type == "nodejs" ? "nodejs.zip" : "python.zip"
-  source = var.type == "nodejs" ? "${var.path}/nodejs.zip" : "${var.path}/python.zip"
-  etag   = var.type == "nodejs" ? filemd5("${var.path}/nodejs.zip") : filemd5("${var.path}/python.zip")
-  tags = {
-    Project   = "Blog"
-    Stage     = var.stage
-    Developer = var.developer
-  }
-}
+# resource "aws_s3_bucket_object" "object" {
+#   bucket = var.bucket_name
+#   key    = var.type == "nodejs" ? "nodejs.zip" : "python.zip"
+#   source = var.type == "nodejs" ? "${var.path}/nodejs.zip" : "${var.path}/python.zip"
+#   etag   = var.type == "nodejs" ? filemd5("${var.path}/nodejs.zip") : filemd5("${var.path}/python.zip")
+#   tags = {
+#     Project   = "Blog"
+#     Stage     = var.stage
+#     Developer = var.developer
+#   }
+# }
 
-# Use the uploaded code as the Lambda Layer's code
+/**
+ * Use the object in the S3 bucket to set the Lambda Layer.
+ */
 resource "aws_lambda_layer_version" "layer" {
   layer_name = var.type == "nodejs" ? "analytics_js" : "analytics_python"
   s3_bucket = var.bucket_name
-  s3_key = aws_s3_bucket_object.object.key
+  s3_key = var.type == "nodejs" ? "nodejs.zip" : "python.zip"
 
   description = var.type == "nodejs" ? "Node Framework used to access DynamoDB" : "Python Framework used to access DynamoDB"
   compatible_runtimes = var.type == "nodejs" ? ["nodejs12.x"] : ["python3.8"]
-  source_code_hash = var.type == "nodejs" ? filebase64sha256("${var.path}/nodejs.zip") : filebase64sha256("${var.path}/python.zip")
+  # source_code_hash = var.type == "nodejs" ? filebase64sha256("${var.path}/nodejs.zip") : filebase64sha256("${var.path}/python.zip")
 }
 
