@@ -16,9 +16,10 @@ if ( ! test -f "../python.zip" ) || ( ! test -f "../nodejs.zip" ); then
 
   # Unpack all of the wheels
   for i in *.whl; do
-    python -m wheel unpack "$i" &> /dev/null;
-    echo "Unpacked wheel $i here"
-    ls .
+    python -m wheel unpack "$i"
+    # python -m wheel unpack "$i" &> /dev/null;
+    # echo "Unpacked wheel $i here"
+    # ls .
     rm $i;
   done
 
