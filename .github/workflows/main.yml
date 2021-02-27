@@ -72,9 +72,7 @@ jobs:
           aws s3 cp ./nodejs.zip s3://tf-cloud
       - name: Copy Lambda Functions to S3
         run : |
-          aws s3 cp ./code/lambda/custom_message.zip s3://tf-cloud
-          aws s3 cp ./code/lambda/delete_comment.zip s3://tf-cloud
-          aws s3 cp ./code/lambda/delete_post.zip s3://tf-cloud
+          aws s3 cp ./code/lambda/. s3://tf-cloud --recursive --exclude "*" --include "*.zip"
   Terraform:
     runs-on: ubuntu-18.04
     needs: [ Unit-Tests, S3-Sync ]
