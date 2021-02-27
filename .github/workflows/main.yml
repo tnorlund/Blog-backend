@@ -51,6 +51,11 @@ jobs:
     needs: Unit-Tests
     steps:
       - uses: actions/checkout@v2
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+          terraform_version: 0.14.4
       - name: Setup Python 3.8
         uses: actions/setup-python@v2
         with:
@@ -60,14 +65,10 @@ jobs:
           cd setup/
           bash setup.sh
           cd ../
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-          terraform_version: 0.14.4
       - name: Terraform Format
         id: fmt
         run: |
+          ls
           cd terraform
           terraform fmt -check
         continue-on-error: true
