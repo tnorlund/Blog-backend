@@ -65,7 +65,7 @@ module "python_layer" {
   path        = ".."
   developer   = "Tyler Norlund"
   # bucket_name = module.layer_bucket.bucket_name
-  bucket_name = "tf-cloud-${var.stage}"
+  bucket_name = "tf-cloud"
   stage       = var.stage
 }
 module "node_layer" {
