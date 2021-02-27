@@ -58,34 +58,27 @@ module "python_layer" {
   type        = "python"
   developer   = "Tyler Norlund"
   bucket_name = "tf-cloud"
-  stage       = var.stage
 }
 module "node_layer" {
   source      = "./LambdaLayer"
   type        = "nodejs"
   developer   = "Tyler Norlund"
   bucket_name = "tf-cloud"
-  stage       = var.stage
 }
 
 /**
  * The Analytics module handles the Kinesis Firehose, DynamoDB, and the Lambda
  * Functions used with them.
  */
-# module "analytics" {
-#   source            = "./analytics"
-#   kinesis_path      = "../code/lambda/"
-#   kinesis_file_name = "kinesis_processor"
-#   dynamo_path       = "../code/lambda/"
-#   dynamo_file_name  = "dynamo_processor"
-#   s3_path           = "../code/lambda"
-#   s3_file_name      = "s3_processor"
-#   table_name        = "Blog"
-#   developer         = "Tyler Norlund"
-#   node_layer_arn    = module.node_layer.arn
-#   python_layer_arn  = module.python_layer.arn
-#   ipify_key         = var.ipify_key
-# }
+module "analytics" {
+  source           = "./Analytics"
+  developer        = "Tyler Norlund"
+  bucket_name      = "tf-cloud"
+  table_name       = "Blog"
+  node_layer_arn   = module.node_layer.arn
+  python_layer_arn = module.python_layer.arn
+  ipify_key        = var.ipify_key
+}
 
 # module "identity" {
 #   source                      = "./Identity"

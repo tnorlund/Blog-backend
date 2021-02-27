@@ -3,21 +3,9 @@ variable "developer" {
   description = "The name of the developer making the change"
 }
 
-# The development stage
-variable "stage" {
+variable "bucket_name" {
   type = string
-  default = "dev"
-  description = "The stage of the production."
-}
-
-variable "kinesis_file_name" {
-  type = string
-  description = "The name of the file used in the Lambda Function"
-}
-
-variable "kinesis_path" {
-  type = string
-  description = "The path to the file used in the Lambda Function"
+  description = "The name of the S3 bucket used to hold the uploaded code"
 }
 
 variable "node_layer_arn" {
@@ -70,26 +58,6 @@ variable "gsi2_read_capacity" {
   type = number
   default = 5
   description = "The read capcity of the second Global Secondary Index"
-}
-
-variable "dynamo_file_name" {
-  type = string
-  description = "The name of the file used in the Lambda Function"
-}
-
-variable "dynamo_path" {
-  type = string
-  description = "The path to the file used in the Lambda Function"
-}
-
-variable "s3_file_name" {
-  type = string
-  description = "The name of the file used in the S3 processor Lambda Function"
-}
-
-variable "s3_path" {
-  type = string
-  description = "The path to the file used in the S3 processor Lambda Function"
 }
 
 variable "ipify_key" {
