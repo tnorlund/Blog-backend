@@ -99,9 +99,7 @@ jobs:
         id: plan
         if: github.event_name == 'pull_request'
         run: |
-          ls
           cd terraform
-          ls
           terraform plan -no-color
         continue-on-error: true
 
@@ -133,4 +131,6 @@ jobs:
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-        run: terraform apply -auto-approve
+        run: |
+          cd terraform
+          terraform apply -auto-approve
