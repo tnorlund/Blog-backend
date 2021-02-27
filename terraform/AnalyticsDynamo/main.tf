@@ -101,7 +101,6 @@ data "aws_iam_policy_document" "lambda_policy_doc" {
     sid = "codecommitid"
   }
 }
-
 resource "aws_iam_role" "lambda_role" {
   name               = "iam_dynamo_stream"
   assume_role_policy = <<EOF
@@ -167,7 +166,7 @@ resource "aws_lambda_event_source_mapping" "dynamo_mapping" {
 
 # Create an S3 Bucket to store the Kinesis data
 resource "aws_s3_bucket" "bucket" {
-  bucket = "blog-analytics"
+  bucket = "tylernorlund-blog-analytics"
   acl    = "private"
   tags = {
     Project   = "Blog"
