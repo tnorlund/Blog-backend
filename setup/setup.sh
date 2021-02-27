@@ -13,8 +13,6 @@ if ( ! test -f "../python.zip" ) || ( ! test -f "../nodejs.zip" ); then
     curl -O "$p" &> /dev/null;
   done < require.txt
 
-  echo 'Did this download the requirements?'
-  ls .
 
   # Unpack all of the wheels
   for i in *.whl; do
@@ -28,9 +26,11 @@ if ( ! test -f "../python.zip" ) || ( ! test -f "../nodejs.zip" ); then
   mkdir ../python/lib/python3.8
   mkdir ../python/lib/python3.8/site-packages
 
+  echo 'Is everything unpacked?'
+  ls -d */
 
   # Move the unpacked packages into the correct location
-  for i in $(ls -d */); do 
+  for i in $(ls -d */); do  
     for j in $(ls $i); do
       mv -f "$i/$j" ../python/lib/python3.8/site-packages;
     done
