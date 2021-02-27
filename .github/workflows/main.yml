@@ -68,15 +68,14 @@ jobs:
       - name: Terraform Format
         id: fmt
         run: |
-          ls
           cd terraform/
           terraform fmt -check
         continue-on-error: true
       - name: Terraform Initialize
         id: init
         run: |
-          ls
           cd terraform/
+          ls
           terraform init
       - name: Terraform Validate
         id: validate
