@@ -28,9 +28,9 @@ variable "aws_region" {
 }
 
 variable "stage" {
-  type = string
+  type        = string
   description = "The stage of development"
-  default = "dev"
+  default     = "dev"
 }
 
 variable "api_name" {
@@ -54,18 +54,18 @@ provider "aws" {
  * above.
  */
 module "python_layer" {
-  source      = "./LambdaLayer"
-  type        = "python"
-  path        = ".."
-  developer   = "Tyler Norlund"
+  source    = "./LambdaLayer"
+  type      = "python"
+  path      = ".."
+  developer = "Tyler Norlund"
   # bucket_name = module.layer_bucket.bucket_name
   bucket_name = "tf-cloud"
   stage       = var.stage
 }
 module "node_layer" {
-  source      = "./LambdaLayer"
-  type        = "nodejs"
-  path        = ".."
+  source = "./LambdaLayer"
+  type   = "nodejs"
+  path   = ".."
   # bucket_name = module.layer_bucket.bucket_name
   bucket_name = "tf-cloud-${var.stage}"
   developer   = "Tyler Norlund"
