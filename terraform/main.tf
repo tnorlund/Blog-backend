@@ -63,8 +63,8 @@ module "python_layer" {
 module "node_layer" {
   source      = "./LambdaLayer"
   type        = "nodejs"
-  bucket_name = "tf-cloud"
   developer   = "Tyler Norlund"
+  bucket_name = "tf-cloud"
   stage       = var.stage
 }
 
