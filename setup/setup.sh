@@ -13,9 +13,12 @@ if ( ! test -f "../python.zip" ) || ( ! test -f "../nodejs.zip" ); then
     curl -O "$p" &> /dev/null;
   done < require.txt
 
+  echo 'Did this download the requirements?'
+  ls .
+
   # Unpack all of the wheels
   for i in *.whl; do
-    python3 -m wheel unpack "$i" &> /dev/null;
+    python -m wheel unpack "$i" &> /dev/null;
     rm $i;
   done
 
@@ -25,8 +28,6 @@ if ( ! test -f "../python.zip" ) || ( ! test -f "../nodejs.zip" ); then
   mkdir ../python/lib/python3.8
   mkdir ../python/lib/python3.8/site-packages
 
-  echo 'Looking at what is here'
-  ls .
 
   # Move the unpacked packages into the correct location
   for i in $(ls -d */); do 
@@ -38,9 +39,9 @@ if ( ! test -f "../python.zip" ) || ( ! test -f "../nodejs.zip" ); then
 
   # Build the python library
   cd ../code/python;
-  python3 setup.py bdist_wheel &> /dev/null;
+  python setup.py bdist_wheel &> /dev/null;
   cd dist/;
-  python3 -m wheel unpack dynamo-0.0.1-py3-none-any.whl &> /dev/null;
+  python -m wheel unpack dynamo-0.0.1-py3-none-any.whl &> /dev/null;
   cp -r dynamo-0.0.1/dynamo ../../../python/lib/python3.8/site-packages;
   cp -r dynamo-0.0.1/dynamo-0.0.1.dist-info ../../../python/lib/python3.8/site-packages;
   cd ../../../;
