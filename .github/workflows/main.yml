@@ -69,7 +69,12 @@ jobs:
       - name: Copy Lambda Layers to S3
         run: |
           aws s3 cp ./python.zip s3://tf-cloud
-          aws s3 cp ./python.zip s3://tf-cloud
+          aws s3 cp ./nodejs.zip s3://tf-cloud
+      - name: Copy Lambda Functions to S3
+        run : |
+          aws s3 cp ./code/lambda/custom_message.zip s3://tf-cloud
+          aws s3 cp ./code/lambda/delete_comment.zip s3://tf-cloud
+          aws s3 cp ./code/lambda/delete_post.zip s3://tf-cloud
   Terraform:
     runs-on: ubuntu-18.04
     needs: [ Unit-Tests, S3-Sync ]
