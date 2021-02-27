@@ -49,12 +49,6 @@ provider "aws" {
   region = var.aws_region
 }
 
-# module "layer_bucket" {
-#   source    = "./LambdaLayerBucket"
-#   developer = "Tyler Norlund"
-#   stage     = var.stage
-# }
-
 /**
  * The Python and NodeJS Lambda Layers should be uploaded to the bucket created
  * above.
