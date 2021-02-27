@@ -5,7 +5,7 @@
 
 # Create the DynamoDB table
 resource "aws_dynamodb_table" "table" {
-  name             = "${var.table_name}_${var.stage}"
+  name             = var.table_name
   billing_mode     = "PROVISIONED"
   read_capacity    = var.read_capacity
   write_capacity   = var.write_capacity
@@ -68,7 +68,6 @@ resource "aws_dynamodb_table" "table" {
   # The tags related to the table.
   tags = {
     Project   = "Blog"
-    Stage     = var.stage
     Developer = var.developer
   }
 }
@@ -102,11 +101,7 @@ data "aws_iam_policy_document" "lambda_policy_doc" {
     sid = "codecommitid"
   }
 }
-data "archive_file" "dynamo" {
-  type        = "zip"
-  source_file = "${var.dynamo_path}/${var.dynamo_file_name}.js"
-  output_path = "${var.dynamo_path}/${var.dynamo_file_name}.zip"
-}
+
 resource "aws_iam_role" "lambda_role" {
   name               = "iam_dynamo_stream"
   assume_role_policy = <<EOF
@@ -129,23 +124,32 @@ resource "aws_iam_role_policy" "lambda_policy" {
   policy = data.aws_iam_policy_document.lambda_policy_doc.json
   role   = aws_iam_role.lambda_role.id
 }
+
+/**
+ * Get the object from S3 to see if it needs to be applied.
+ */
+data "aws_s3_bucket_object" "dynamo_db_stream" {
+  bucket = var.bucket_name
+  key    = "dynamo_processor.zip"
+}
 resource "aws_lambda_function" "dynamo_db_stream" {
-  filename          = "${var.dynamo_path}/${var.dynamo_file_name}.zip"
-  function_name     = "dynamodb-lambda-stream-${var.stage}"
+  # filename          = "${var.dynamo_path}/${var.dynamo_file_name}.zip"
+  s3_bucket         = var.bucket_name
+  s3_key            = "dynamo_processor.zip"
+  function_name     = "dynamodb-lambda-stream"
   role              = aws_iam_role.lambda_role.arn
-  handler           = "${var.dynamo_file_name}.handler"
-  source_code_hash  = filebase64sha256("${var.dynamo_path}/${var.dynamo_file_name}.zip")
+  handler           = "dynamo_processor.handler"
+  source_code_hash  = data.aws_s3_bucket_object.dynamo_db_stream.body
   runtime           = "nodejs12.x"
   layers            = [ var.node_layer_arn ]
   environment {
     variables = {
       IPIFY_KEY = var.ipify_key
-      TABLE_NAME = "${var.table_name}_${var.stage}"
+      TABLE_NAME = var.table_name
     }
   }
   tags = {
     Project   = "Blog"
-    Stage     = var.stage
     Developer = var.developer
   }
 }
@@ -155,26 +159,22 @@ resource "aws_lambda_event_source_mapping" "dynamo_mapping" {
   enabled           = true
   function_name     = aws_lambda_function.dynamo_db_stream.arn
   starting_position = "TRIM_HORIZON"
-  depends_on        = [ aws_lambda_function.dynamo_db_stream, aws_dynamodb_table.table ]
+  depends_on        = [ 
+    aws_lambda_function.dynamo_db_stream, 
+    aws_dynamodb_table.table 
+  ]
 }
 
 # Create an S3 Bucket to store the Kinesis data
 resource "aws_s3_bucket" "bucket" {
-  bucket = "blog-analytics-${var.stage}"
+  bucket = "blog-analytics"
   acl    = "private"
   tags = {
     Project   = "Blog"
-    Stage     = var.stage
     Developer = var.developer
   }
 }
 
-# Create a Lambda function to process the S3 bucket put objects
-data "archive_file" "s3" {
-  type = "zip"
-  source_file = "${var.s3_path}/${var.s3_file_name}.py"
-  output_path = "${var.s3_path}/${var.s3_file_name}.zip"
-}
 data "aws_iam_policy_document" "s3" {
   statement {
     effect = "Allow"
@@ -222,14 +222,22 @@ resource "aws_iam_role_policy" "s3" {
   policy = data.aws_iam_policy_document.s3.json
   role   = aws_iam_role.s3.id
 }
+
+/**
+ * Get the object from S3 to see if it needs to be applied.
+ */
+data "aws_s3_bucket_object" "s3" {
+  bucket = var.bucket_name
+  key    = "s3_processor.zip"
+}
 resource "aws_lambda_function" "s3" {
-  filename          = "${var.s3_path}/${var.s3_file_name}.zip"
-  function_name     = "s3-lambda-processor-${var.stage}"
+  # filename          = "${var.s3_path}/${var.s3_file_name}.zip"
+  s3_bucket         = var.bucket_name
+  s3_key            = "s3_processor.zip"
+  function_name     = "s3-lambda-processor"
   role              = aws_iam_role.s3.arn
-  handler           = "${var.s3_file_name}.${var.s3_file_name}"
-  source_code_hash  = filebase64sha256(
-    "${var.s3_path}/${var.s3_file_name}.zip"
-  )
+  handler           = "s3_processor.s3_processor"
+  source_code_hash  = data.aws_s3_bucket_object.s3.body
   runtime           = "python3.8"
   layers            = [ var.python_layer_arn ]
   memory_size       = 256
@@ -237,12 +245,11 @@ resource "aws_lambda_function" "s3" {
   environment {
     variables = {
       IPIFY_KEY = var.ipify_key
-      TABLE_NAME = "${var.table_name}_${var.stage}"
+      TABLE_NAME = var.table_name
     }
   }
   tags              = {
     Project   = "Blog"
-    Stage     = var.stage
     Developer = var.developer
   }
 }
@@ -283,11 +290,7 @@ data "aws_iam_policy_document" "kinesis" {
     sid = "lambdaKinesisProcessor"
   }
 }
-data "archive_file" "kinesis" {
-  type = "zip"
-  source_file = "${var.kinesis_path}/${var.kinesis_file_name}.js"
-  output_path = "${var.kinesis_path}/${var.kinesis_file_name}.zip"
-}
+
 resource "aws_iam_role" "kinesis" {
    name = "kinesis_process_role"
 
@@ -310,14 +313,21 @@ resource "aws_iam_role_policy" "lambda_processor" {
   policy = data.aws_iam_policy_document.kinesis.json
   role   = aws_iam_role.kinesis.id
 }
+/**
+ * Get the object from S3 to see if it needs to be applied.
+ */
+data "aws_s3_bucket_object" "kinesis_processor" {
+  bucket = var.bucket_name
+  key    = "kinesis_processor.zip"
+}
 resource "aws_lambda_function" "kinesis_processor" {
-  filename          = "${var.kinesis_path}/${var.kinesis_file_name}.zip"
-  function_name     = "firehose-lambda-processor-${var.stage}"
+  # filename          = "${var.kinesis_path}/${var.kinesis_file_name}.zip"
+  s3_bucket         = var.bucket_name
+  s3_key            = "kinesis_processor.zip"
+  function_name     = "firehose-lambda-processor"
   role              = aws_iam_role.kinesis.arn
-  handler           = "${var.kinesis_file_name}.handler"
-  source_code_hash  = filebase64sha256(
-    "${var.kinesis_path}/${var.kinesis_file_name}.zip"
-  )
+  handler           = "kinesis_processor.handler"
+  source_code_hash  = data.aws_s3_bucket_object.kinesis_processor.body
   runtime           = "nodejs12.x"
   layers            = [ var.node_layer_arn ]
   memory_size       = 256
@@ -325,12 +335,11 @@ resource "aws_lambda_function" "kinesis_processor" {
   environment {
     variables = {
       IPIFY_KEY = var.ipify_key
-      TABLE_NAME = "${var.table_name}_${var.stage}"
+      TABLE_NAME = var.table_name
     }
   }
   tags              = {
     Project   = "Blog"
-    Stage     = var.stage
     Developer = var.developer
   }
 }
@@ -385,13 +394,13 @@ resource "aws_iam_role_policy" "kinesis_stream" {
   role   = aws_iam_role.kinesis_role.id
 }
 resource "aws_kinesis_firehose_delivery_stream" "extended_s3_stream" {
-  name        = "tylernorlund_blog_analytics_${var.stage}"
+  name        = "tylernorlund_blog_analytics"
   destination = "extended_s3"
   
 
   extended_s3_configuration {
     cloudwatch_logging_options {
-      log_group_name = "/aws/lambda/tylernorlund_blog_analytics_${var.stage}"
+      log_group_name = "/aws/lambda/tylernorlund_blog_analytics"
       log_stream_name = "example_stream"
       enabled = true
     }
@@ -413,10 +422,10 @@ resource "aws_kinesis_firehose_delivery_stream" "extended_s3_stream" {
   }
 }
 resource "aws_cloudwatch_log_group" "stream" {
-  name              = "/aws/lambda/tylernorlund_blog_analytics_${var.stage}"
+  name              = "/aws/lambda/tylernorlund_blog_analytics"
   retention_in_days = 14
 }
 resource "aws_cloudwatch_log_group" "processor" {
-  name              = "/aws/lambda/firehose-lambda-processor-${var.stage}"
+  name              = "/aws/lambda/firehose-lambda-processor"
   retention_in_days = 14
 }
