@@ -13,6 +13,9 @@ if ( ! test -f "../python.zip" ) || ( ! test -f "../nodejs.zip" ); then
     curl -O "$p" &> /dev/null;
   done < require.txt
 
+  # Install wheel
+  python -m pip install --upgrade pip &> /dev/null;
+  python -m pip install wheel &> /dev/null;
 
   # Unpack all of the wheels
   for i in *.whl; do
