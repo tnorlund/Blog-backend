@@ -1,3 +1,25 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "3.26.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.0.1"
+    }
+  }
+  required_version = "~> 0.14"
+
+  backend "remote" {
+    organization = "Tyler Norlund"
+
+    workspaces {
+      name = "gh-actions-demo"
+    }
+  }
+}
+
 variable "ipify_key" {
   type        = string
   description = "The ipify key used to make REST queries"
@@ -6,7 +28,13 @@ variable "ipify_key" {
 variable "aws_region" {
   type        = string
   description = "The AWS region"
-  default     = "us-west-2"
+  default     = "us-east-1"
+}
+
+variable "stage" {
+  type = string
+  description = "The stage of development"
+  default = "dev"
 }
 
 variable "api_name" {
@@ -14,33 +42,48 @@ variable "api_name" {
   default = "blog_api"
 }
 
+variable "domain" {
+  default = "tylernorlund.com"
+}
+
+/**
+ * The AWS provider should be handled by ENV vars. 
+ */
 provider "aws" {
-  shared_credentials_file = "~/.aws/credentials"
-  profile                 = "development"
-  region                  = var.aws_region
+  region = var.aws_region
 }
 
 module "layer_bucket" {
   source    = "./LambdaLayerBucket"
   developer = "Tyler Norlund"
+  stage     = var.stage
 }
 
+/**
+ * The Python and NodeJS Lambda Layers should be uploaded to the bucket created
+ * above.
+ */
 module "python_layer" {
   source      = "./LambdaLayer"
   type        = "python"
   path        = ".."
-  bucket_name = module.layer_bucket.bucket_name
   developer   = "Tyler Norlund"
+  bucket_name = module.layer_bucket.bucket_name
+  stage       = var.stage
 }
-
 module "node_layer" {
   source      = "./LambdaLayer"
   type        = "nodejs"
   path        = ".."
   bucket_name = module.layer_bucket.bucket_name
   developer   = "Tyler Norlund"
+  stage       = var.stage
 }
 
+/**
+ * The Analytics module handles the Kinesis Firehose, DynamoDB, and the Lambda
+ * Functions used with them.
+ */
 module "analytics" {
   source            = "./analytics"
   kinesis_path      = "../code/lambda/"
@@ -63,6 +106,7 @@ module "identity" {
   identity_pool_name          = "blog_identity_pool"
   firehose_arn                = module.analytics.firehose_arn
   api_name                    = var.api_name
+  domain                      = var.domain
   custom_message_path         = "../code/lambda"
   custom_message_file_name    = "custom_message"
   post_confirmation_path      = "../code/lambda"
@@ -70,6 +114,15 @@ module "identity" {
   dynamo_arn                  = module.analytics.dynamo_arn
   table_name                  = module.analytics.dynamo_table_name
   node_layer_arn              = module.node_layer.arn
+}
+
+resource "aws_api_gateway_authorizer" "authorizer" {
+  name          = "CognitoUserPoolAuthorizer"
+  type          = "COGNITO_USER_POOLS"
+  rest_api_id   = module.identity.api_gateway_id
+  provider_arns = [
+    module.identity.user_pool_arn
+  ]
 }
 
 module "api_blog" {
@@ -144,8 +197,8 @@ module "api_post" {
   post_post_file_name          = "post_post"
   get_post_path                = "../code/lambda"
   get_post_file_name           = "get_post"
-  delete_post_path                = "../code/lambda"
-  delete_post_file_name           = "delete_post"
+  delete_post_path             = "../code/lambda"
+  delete_post_file_name        = "delete_post"
   get_post_details_path        = "../code/lambda"
   get_post_details_file_name   = "get_post_details"
   developer                    = "Tyler Norlund"
@@ -183,6 +236,7 @@ module "api_user" {
   post_disable_user_path       = "../code/lambda"
   post_disable_user_file_name  = "post_disable_user"
   developer                    = "Tyler Norlund"
+  authorizer_id                = aws_api_gateway_authorizer.authorizer.id
   user_pool_id                 = module.identity.user_pool_id
   user_pool_arn                = module.identity.user_pool_arn
   api_gateway_id               = module.identity.api_gateway_id
@@ -206,6 +260,11 @@ module "api_deployment" {
     module.api_user.integrations,
   )
   depends_on = [ module.api_comment.methods ]
+}
+
+module "cdn" {
+  source = "./Content Delivery"
+  domain = var.domain
 }
 
 output "GATSBY_API_BLOG_ENDPOINT" {

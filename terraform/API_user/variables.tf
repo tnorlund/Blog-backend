@@ -93,3 +93,8 @@ variable "dynamo_arn"{
   type = string
   description = "The ARN of the DynamoDB table"
 }
+
+variable "authorizer_id" {
+  type= string
+  description = "The API Gateway Authorizer"
+}

@@ -3,6 +3,11 @@ variable "developer" {
   description = "The name of the developer making the change"
 }
 
+variable "domain" {
+  type = string
+  description = "The domain used to host the website"
+}
+
 # The development stage
 variable "stage" {
   type = string

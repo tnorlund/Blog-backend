@@ -136,8 +136,10 @@ resource "aws_api_gateway_method" "get_user_details" {
   rest_api_id   = var.api_gateway_id
   resource_id   = aws_api_gateway_resource.user_details.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = var.authorizer_id
 }
+
 resource "aws_api_gateway_integration" "get_user_details" {
   rest_api_id             = var.api_gateway_id
   resource_id             = aws_api_gateway_resource.user_details.id
@@ -201,7 +203,8 @@ resource "aws_api_gateway_method" "post_user_name" {
   rest_api_id   = var.api_gateway_id
   resource_id   = aws_api_gateway_resource.user_name.id
   http_method   = "POST"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = var.authorizer_id
 }
 resource "aws_api_gateway_integration" "post_user_name" {
   rest_api_id             = var.api_gateway_id
@@ -267,7 +270,8 @@ resource "aws_api_gateway_method" "post_disable_user" {
   rest_api_id   = var.api_gateway_id
   resource_id   = aws_api_gateway_resource.disable_user.id
   http_method   = "POST"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = var.authorizer_id
 }
 resource "aws_api_gateway_integration" "post_disable_user" {
   rest_api_id             = var.api_gateway_id

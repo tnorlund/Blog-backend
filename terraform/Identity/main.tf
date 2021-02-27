@@ -1,13 +1,5 @@
-# Identity
-#
-#
-#
-# Both the API Gateway and SES require a certificate from Route 53.
-resource "aws_ses_domain_identity" "identity" {
-  domain = "tylernorlund.com"
-}
-data "aws_route53_zone" "blog" {
-  name = "tylernorlund.com"
+resource "aws_ses_email_identity" "identity" {
+  email = "no-reply@${var.domain}"
 }
 
 # Create the REST API
@@ -17,9 +9,10 @@ resource "aws_api_gateway_rest_api" "main" {
 
 # Cognito
 resource "aws_cognito_user_pool" "main" {
-  name = "${var.user_pool_name}_${var.stage}"
-  username_attributes = [ "email" ]
+  name                     = "${var.user_pool_name}_${var.stage}"
+  username_attributes      = [ "email" ]
   auto_verified_attributes = ["email"]
+  mfa_configuration        = "OFF"
   schema {
     attribute_data_type = "String"
     mutable             = true
@@ -40,7 +33,6 @@ resource "aws_cognito_user_pool" "main" {
     require_symbols   = true
     require_uppercase = true
   }
-  mfa_configuration        = "OFF"
 
   lambda_config {
     custom_message    = aws_lambda_function.custom_message.arn
@@ -48,6 +40,11 @@ resource "aws_cognito_user_pool" "main" {
   }
   lifecycle {
     ignore_changes = [ schema ]
+  }
+  email_configuration {
+    source_arn = aws_ses_email_identity.identity.arn
+    reply_to_email_address = "no-reply@${var.domain}"
+    email_sending_account = "DEVELOPER"
   }
 }
 
