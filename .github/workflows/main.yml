@@ -86,7 +86,7 @@ jobs:
 
       - name: Terraform Format
         id: fmt
-        run: terraform fmt -check -recursive -list=false terraform/
+        run: terraform fmt -check terraform/
         continue-on-error: true
 
       - name: Terraform Initialize
