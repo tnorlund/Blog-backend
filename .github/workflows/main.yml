@@ -32,6 +32,10 @@ jobs:
         npm ci 
         npm i -g jest
         cd ../../../
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
     - name: Test with Pytest
       run: |
         cd code/python/
