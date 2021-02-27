@@ -192,7 +192,7 @@ module "api_comment" {
 }
 
 module "api_post" {
-  source                       = "./API_post"
+  source                       = "./API_Post"
   post_post_path               = "../code/lambda"
   post_post_file_name          = "post_post"
   get_post_path                = "../code/lambda"
