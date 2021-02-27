@@ -34,6 +34,7 @@ exports.handler = async ( event, context ) => {
     typeof parsedBody.name == `undefined` ||
     typeof parsedBody.email == `undefined` ||
     typeof parsedBody.username == `undefined` ||
+    typeof parsedBody.commentUsername == `undefined` ||
     typeof parsedBody.slug == `undefined` ||
     typeof parsedBody.commentDateAdded == `undefined` ||
     typeof parsedBody.up == `undefined` ||
@@ -57,7 +58,7 @@ exports.handler = async ( event, context ) => {
       title: `something`
     } ),
     new Comment( {
-      username: parsedBody.username,
+      username: parsedBody.commentUsername,
       userCommentNumber: `0`,
       name: parsedBody.name,
       slug: parsedBody.slug,

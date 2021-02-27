@@ -158,7 +158,7 @@ describe( `updateUserName`, () => {
     user.numberVotes += 1
     let result = await updateUserName( `test-table`, user, `Simon` )
     user.name = `Simon`
-    expect( result ).toEqual( user )
+    expect( result ).toEqual( { user } )
     result = await getUserDetails( `test-table`, user )
     expect( result.user ).toEqual( user )
     expect( 
