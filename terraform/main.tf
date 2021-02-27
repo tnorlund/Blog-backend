@@ -75,10 +75,12 @@ module "analytics" {
   developer        = "Tyler Norlund"
   bucket_name      = "tf-cloud"
   table_name       = "Blog"
+  region           = var.aws_region
   node_layer_arn   = module.node_layer.arn
   python_layer_arn = module.python_layer.arn
   ipify_key        = var.ipify_key
 }
+
 
 # module "identity" {
 #   source                      = "./Identity"
@@ -264,13 +266,13 @@ module "analytics" {
 #   value = module.identity.user_pool_client_id
 # }
 
-# output "GATSBY_DYNAMO_TABLE" {
-#   value = module.analytics.dynamo_table_name
-# }
+output "GATSBY_DYNAMO_TABLE" {
+  value = module.analytics.dynamo_table_name
+}
 
-# output "GATSBY_ANALYTICS_FIREHOSE" {
-#   value = module.analytics.firehose_stream_name
-# }
+output "GATSBY_ANALYTICS_FIREHOSE" {
+  value = module.analytics.firehose_stream_name
+}
 
 # output "GATSBY_AWS_REGION" {
 #   value = var.aws_region

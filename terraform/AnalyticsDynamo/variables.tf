@@ -24,6 +24,11 @@ variable "table_name" {
   description = "The name of the DynamoDB table"
 }
 
+variable "region" {
+  type = string
+  description = "The region for the S3 bucket and the DynamoDB table"
+}
+
 # The primary index's read and write capcities.
 variable "write_capacity" {
   type = number
