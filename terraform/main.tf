@@ -125,9 +125,9 @@ POLICY
  * email address.
  */
 resource "aws_acm_certificate" "certificate" {
-  domain_name       = "*.${var.root_domain_name}"
-  validation_method = "EMAIL"
-  subject_alternative_names = [ var.root_domain_name ]
+  domain_name               = "*.${var.root_domain_name}"
+  validation_method         = "EMAIL"
+  subject_alternative_names = [var.root_domain_name]
 }
 
 /**
@@ -181,7 +181,7 @@ resource "aws_cloudfront_distribution" "www_distribution" {
    * This sets the aliases of the Cloudfront distribution. Here, it is being
    * set to be accessible by <var.www_domain_name>.
    */
-  aliases = [ var.www_domain_name ]
+  aliases = [var.www_domain_name]
 
   restrictions {
     geo_restriction {
