@@ -91,13 +91,40 @@ module "identity" {
   bucket_name                 = "tf-cloud"
   user_pool_name              = "blog_user_pool"
   identity_pool_name          = "blog_identity_pool"
-  stage                       = "prod"
+  stage                       = var.stage
   firehose_arn                = module.analytics.firehose_arn
   api_name                    = var.api_name
   domain                      = var.domain
   dynamo_arn                  = module.analytics.dynamo_arn
   table_name                  = module.analytics.dynamo_table_name
   node_layer_arn              = module.node_layer.arn
+}
+
+/**
+ * The API module handles the different methods used in the API. If any method
+ * changes, it redeploys the stage.
+ */
+module "api" {
+  source                       = "./API"
+  developer                    = "Tyler Norlund"
+  bucket_name                  = "tf-cloud"
+  stage                        = var.stage
+  api_gateway_id               = module.identity.api_gateway_id
+  api_gateway_execution_arn    = module.identity.api_gateway_execution_arn
+  api_gateway_arn              = module.identity.api_gateway_arn
+  api_gateway_root_resource_id = module.identity.api_gateway_root_resource_id
+  table_name                   = module.analytics.dynamo_table_name
+  dynamo_arn                   = module.analytics.dynamo_arn
+  node_layer_arn               = module.node_layer.arn
+  user_pool_arn                = module.identity.user_pool_arn
+}
+
+/**
+ * The content delivery module created the CloudFront distribution and
+ * redirects to it using Route 53.
+ */
+module "content_delivery" {
+  source = "./ContentDelivery"
 }
 
 # resource "aws_api_gateway_authorizer" "authorizer" {
