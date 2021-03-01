@@ -419,6 +419,9 @@ resource "aws_kinesis_firehose_delivery_stream" "extended_s3_stream" {
       }
     }
   }
+  lifecycle {
+    ignore_changes = [ extended_s3_configuration ]
+  }
 }
 resource "aws_cloudwatch_log_group" "stream" {
   name              = "/aws/lambda/tylernorlund_blog_analytics"
