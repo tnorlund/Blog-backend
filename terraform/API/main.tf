@@ -20,7 +20,11 @@ resource "aws_iam_role" "lambda_role" {
     {
       "Action": "sts:AssumeRole",
       "Principal": {
-        "Service": "lambda.amazonaws.com"
+        "Service": [
+          "apigateway.amazonaws.com",
+          "lambda.amazonaws.com",
+          "events.amazonaws.com"
+        ]
       },
       "Effect": "Allow",
       "Sid": ""
@@ -69,7 +73,11 @@ resource "aws_iam_role" "lambda_role_cognito" {
     {
       "Action": "sts:AssumeRole",
       "Principal": {
-        "Service": "lambda.amazonaws.com"
+        "Service": [
+          "apigateway.amazonaws.com",
+          "lambda.amazonaws.com",
+          "events.amazonaws.com"
+        ]
       },
       "Effect": "Allow",
       "Sid": ""
