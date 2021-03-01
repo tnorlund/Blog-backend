@@ -119,7 +119,7 @@ resource "aws_api_gateway_resource" "blog" {
   parent_id   = var.api_gateway_root_resource_id
   rest_api_id = var.api_gateway_id
 }
-module "cors_reply" {
+module "cors_blog" {
   source            = "squidfunk/api-gateway-enable-cors/aws"
   version           = "0.3.1"
   api_id            = var.api_gateway_id
@@ -291,6 +291,36 @@ module "post_disable_user" {
   node_layer_arn            = var.node_layer_arn
 }
 /******************************************************************************
+ * /tos
+ *
+ *****************************************************************************/
+resource "aws_api_gateway_resource" "tos" {
+  path_part = "tos"
+  parent_id   = var.api_gateway_root_resource_id
+  rest_api_id = var.api_gateway_id
+}
+module "cors_tos" {
+  source            = "squidfunk/api-gateway-enable-cors/aws"
+  version           = "0.3.1"
+  api_id            = var.api_gateway_id
+  api_resource_id   = aws_api_gateway_resource.tos.id
+  allow_credentials = true
+}
+module "post_tos" {
+  source                    = "./POST"
+  function_name             = "post_tos"
+  description               = "A POST method for creating a tos item"
+  developer                 = var.developer
+  bucket_name               = var.bucket_name
+  table_name                = var.table_name
+  api_gateway_id            = var.api_gateway_id
+  api_gateway_execution_arn = var.api_gateway_execution_arn
+  resource_id               = aws_api_gateway_resource.tos.id
+  iam_role_arn              = aws_iam_role.lambda_role.arn
+  resource_path             = aws_api_gateway_resource.tos.path
+  node_layer_arn            = var.node_layer_arn
+}
+/******************************************************************************
  * /project
  *
  *****************************************************************************/
@@ -348,6 +378,212 @@ module "delete_project" {
   resource_path             = aws_api_gateway_resource.project.path
   node_layer_arn            = var.node_layer_arn
 }
+/******************************************************************************
+ * /post
+ *
+ *****************************************************************************/
+resource "aws_api_gateway_resource" "post" {
+  path_part   = "post"
+  parent_id   = var.api_gateway_root_resource_id
+  rest_api_id = var.api_gateway_id
+}
+module "cors_post" {
+  source            = "squidfunk/api-gateway-enable-cors/aws"
+  version           = "0.3.1"
+  api_id            = var.api_gateway_id
+  api_resource_id   = aws_api_gateway_resource.post.id
+  allow_credentials = true
+}
+module "post_post" {
+  source                    = "./POST"
+  function_name             = "post_post"
+  description               = "A POST method for creating a blog item"
+  developer                 = var.developer
+  bucket_name               = var.bucket_name
+  table_name                = var.table_name
+  api_gateway_id            = var.api_gateway_id
+  api_gateway_execution_arn = var.api_gateway_execution_arn
+  resource_id               = aws_api_gateway_resource.post.id
+  iam_role_arn              = aws_iam_role.lambda_role.arn
+  resource_path             = aws_api_gateway_resource.post.path
+  node_layer_arn            = var.node_layer_arn
+}
+module "get_post" {
+  source                    = "./GET"
+  function_name             = "get_post"
+  description               = "A GET method for querying the post item"
+  developer                 = var.developer
+  bucket_name               = var.bucket_name
+  table_name                = var.table_name
+  api_gateway_id            = var.api_gateway_id
+  api_gateway_execution_arn = var.api_gateway_execution_arn
+  resource_id               = aws_api_gateway_resource.post.id
+  iam_role_arn              = aws_iam_role.lambda_role.arn
+  resource_path             = aws_api_gateway_resource.post.path
+  node_layer_arn            = var.node_layer_arn
+}
+module "delete_post" {
+  source                    = "./DELETE"
+  function_name             = "delete_post"
+  description               = "A DELETE method for removing a post item"
+  developer                 = var.developer
+  bucket_name               = var.bucket_name
+  table_name                = var.table_name
+  api_gateway_id            = var.api_gateway_id
+  api_gateway_execution_arn = var.api_gateway_execution_arn
+  resource_id               = aws_api_gateway_resource.post.id
+  iam_role_arn              = aws_iam_role.lambda_role.arn
+  resource_path             = aws_api_gateway_resource.post.path
+  node_layer_arn            = var.node_layer_arn
+}
+/******************************************************************************
+ * /post-details
+ *
+ *****************************************************************************/
+resource "aws_api_gateway_resource" "post_details" {
+  path_part   = "post-details"
+  parent_id   = var.api_gateway_root_resource_id
+  rest_api_id = var.api_gateway_id
+}
+module "cors_post_details" {
+  source            = "squidfunk/api-gateway-enable-cors/aws"
+  version           = "0.3.1"
+  api_id            = var.api_gateway_id
+  api_resource_id   = aws_api_gateway_resource.post_details.id
+  allow_credentials = true
+}
+module "get_post_details" {
+  source                    = "./GET"
+  function_name             = "get_post_details"
+  description               = "A GET method for querying the post and its details"
+  developer                 = var.developer
+  bucket_name               = var.bucket_name
+  table_name                = var.table_name
+  api_gateway_id            = var.api_gateway_id
+  api_gateway_execution_arn = var.api_gateway_execution_arn
+  resource_id               = aws_api_gateway_resource.post_details.id
+  iam_role_arn              = aws_iam_role.lambda_role.arn
+  resource_path             = aws_api_gateway_resource.post_details.path
+  node_layer_arn            = var.node_layer_arn
+}
+/******************************************************************************
+ * /comment
+ *
+ *****************************************************************************/
+resource "aws_api_gateway_resource" "comment" {
+  path_part   = "comment"
+  parent_id   = var.api_gateway_root_resource_id
+  rest_api_id = var.api_gateway_id
+}
+module "cors_comment" {
+  source            = "squidfunk/api-gateway-enable-cors/aws"
+  version           = "0.3.1"
+  api_id            = var.api_gateway_id
+  api_resource_id   = aws_api_gateway_resource.comment.id
+  allow_credentials = true
+}
+module "post_comment" {
+  source                    = "./POST"
+  function_name             = "post_comment"
+  description               = "A POST method for creating a comment item"
+  developer                 = var.developer
+  bucket_name               = var.bucket_name
+  table_name                = var.table_name
+  api_gateway_id            = var.api_gateway_id
+  api_gateway_execution_arn = var.api_gateway_execution_arn
+  resource_id               = aws_api_gateway_resource.comment.id
+  iam_role_arn              = aws_iam_role.lambda_role.arn
+  resource_path             = aws_api_gateway_resource.comment.path
+  node_layer_arn            = var.node_layer_arn
+}
+module "delete_comment" {
+  source                    = "./DELETE"
+  function_name             = "delete_comment"
+  description               = "A DELETE method for removing a comment item"
+  developer                 = var.developer
+  bucket_name               = var.bucket_name
+  table_name                = var.table_name
+  api_gateway_id            = var.api_gateway_id
+  api_gateway_execution_arn = var.api_gateway_execution_arn
+  resource_id               = aws_api_gateway_resource.comment.id
+  iam_role_arn              = aws_iam_role.lambda_role.arn
+  resource_path             = aws_api_gateway_resource.comment.path
+  node_layer_arn            = var.node_layer_arn
+}
+/******************************************************************************
+ * /reply
+ *
+ *****************************************************************************/
+resource "aws_api_gateway_resource" "reply" {
+  path_part   = "reply"
+  parent_id   = var.api_gateway_root_resource_id
+  rest_api_id = var.api_gateway_id
+}
+module "cors_reply" {
+  source            = "squidfunk/api-gateway-enable-cors/aws"
+  version           = "0.3.1"
+  api_id            = var.api_gateway_id
+  api_resource_id   = aws_api_gateway_resource.reply.id
+  allow_credentials = true
+}
+module "post_reply" {
+  source                    = "./POST"
+  function_name             = "post_reply"
+  description               = "A POST method for creating a reply-comment item"
+  developer                 = var.developer
+  bucket_name               = var.bucket_name
+  table_name                = var.table_name
+  api_gateway_id            = var.api_gateway_id
+  api_gateway_execution_arn = var.api_gateway_execution_arn
+  resource_id               = aws_api_gateway_resource.reply.id
+  iam_role_arn              = aws_iam_role.lambda_role.arn
+  resource_path             = aws_api_gateway_resource.reply.path
+  node_layer_arn            = var.node_layer_arn
+}
+/******************************************************************************
+ * /vote
+ *
+ *****************************************************************************/
+resource "aws_api_gateway_resource" "vote" {
+  path_part   = "vote"
+  parent_id   = var.api_gateway_root_resource_id
+  rest_api_id = var.api_gateway_id
+}
+module "cors_vote" {
+  source            = "squidfunk/api-gateway-enable-cors/aws"
+  version           = "0.3.1"
+  api_id            = var.api_gateway_id
+  api_resource_id   = aws_api_gateway_resource.vote.id
+  allow_credentials = true
+}
+module "post_vote" {
+  source                    = "./POST"
+  function_name             = "post_vote"
+  description               = "A POST method for creating a vote item"
+  developer                 = var.developer
+  bucket_name               = var.bucket_name
+  table_name                = var.table_name
+  api_gateway_id            = var.api_gateway_id
+  api_gateway_execution_arn = var.api_gateway_execution_arn
+  resource_id               = aws_api_gateway_resource.vote.id
+  iam_role_arn              = aws_iam_role.lambda_role.arn
+  resource_path             = aws_api_gateway_resource.vote.path
+  node_layer_arn            = var.node_layer_arn
+}
+module "delete_vote" {
+  source                    = "./DELETE"
+  function_name             = "delete_vote"
+  description               = "A DELETE method for removing a vote item"
+  developer                 = var.developer
+  bucket_name               = var.bucket_name
+  table_name                = var.table_name
+  api_gateway_id            = var.api_gateway_id
+  api_gateway_execution_arn = var.api_gateway_execution_arn
+  resource_id               = aws_api_gateway_resource.vote.id
+  iam_role_arn              = aws_iam_role.lambda_role.arn
+  resource_path             = aws_api_gateway_resource.vote.path
+  node_layer_arn            = var.node_layer_arn
+}
 
 resource "aws_api_gateway_deployment" "deployment" {
   rest_api_id = var.api_gateway_id
@@ -365,6 +601,13 @@ resource "aws_api_gateway_deployment" "deployment" {
           jsonencode( module.post_disable_user.integration ), 
           jsonencode( module.get_project.integration ), 
           jsonencode( module.post_project.integration ), 
+          jsonencode( module.post_post.integration ), 
+          jsonencode( module.get_post.integration ), 
+          jsonencode( module.delete_post.integration ), 
+          jsonencode( module.get_post_details.integration ), 
+          jsonencode( module.post_comment.integration ), 
+          jsonencode( module.delete_comment.integration ), 
+          jsonencode( module.post_reply.integration ), 
         )
       )
     )

@@ -118,7 +118,8 @@ resource "aws_route53_zone" "zone" {
 resource "aws_route53_record" "www" {
   zone_id = aws_route53_zone.zone.zone_id
   name    = var.www_domain_name
-  type    = "A"
+  # type    = "A"
+  type = "CNAME"
 
   alias {
     name                   = aws_cloudfront_distribution.www_distribution.domain_name

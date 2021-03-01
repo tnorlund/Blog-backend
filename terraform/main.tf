@@ -127,21 +127,21 @@ module "content_delivery" {
   source = "./ContentDelivery"
 }
 
-# output "GATSBY_API_BLOG_ENDPOINT" {
-#   value = module.api_deployment.invoke_url
-# }
+output "GATSBY_API_BLOG_ENDPOINT" {
+  value = module.api.invoke_url
+}
 
-# output "GATSBY_COGNITO_IDENTITY_POOL_ID" {
-#   value = module.identity.identity_pool_id
-# }
+output "GATSBY_COGNITO_IDENTITY_POOL_ID" {
+  value = module.identity.identity_pool_id
+}
 
-# output "GATSBY_USER_POOLS_ID" {
-#   value = module.identity.user_pool_id
-# }
+output "GATSBY_USER_POOLS_ID" {
+  value = module.identity.user_pool_id
+}
 
-# output "GATSBY_USER_POOLS_CLIENT_ID" {
-#   value = module.identity.user_pool_client_id
-# }
+output "GATSBY_USER_POOLS_CLIENT_ID" {
+  value = module.identity.user_pool_client_id
+}
 
 output "GATSBY_DYNAMO_TABLE" {
   value = module.analytics.dynamo_table_name
