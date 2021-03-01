@@ -9,10 +9,15 @@ variable "domain" {
 }
 
 # The development stage
+variable "bucket_name" {
+  type = string
+  description = "The S3 bucket used to store the Lambda Functions"
+}
+
 variable "stage" {
   type = string
   default = "dev"
-  description = "The stage of the production."
+  description = "The stage of the REST API"
 }
 
 # The development stage
@@ -35,26 +40,6 @@ variable "firehose_arn" {
 variable "api_name" {
   type = string
   description = "The name of the API Gateway resource"
-}
-
-variable "custom_message_path" {
-  type = string
-  description = "The path to the custom message Lambda Function"
-}
-
-variable "custom_message_file_name" {
-  type = string
-  description = "The file name of the custom message Lambda Function"
-}
-
-variable "post_confirmation_path" {
-  type = string
-  description = "The path to the post confirmation Lambda Function"
-}
-
-variable "post_confirmation_file_name" {
-  type = string
-  description = "The file name of the post confirmation Lambda Function"
 }
 
 variable "node_layer_arn" {

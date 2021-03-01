@@ -259,17 +259,20 @@ resource "aws_iam_role_policy" "custom_message" {
   policy = data.aws_iam_policy_document.custom_message.json
   role   = aws_iam_role.custom_message.id
 }
-data "archive_file" "custom_message" {
-  type = "zip"
-  source_file = "${var.custom_message_path}/${var.custom_message_file_name}.js"
-  output_path = "${var.custom_message_path}/${var.custom_message_file_name}.zip"
+/**
+ * Get the object from S3 to see if it needs to be applied.
+ */
+data "aws_s3_bucket_object" "custom_message" {
+  bucket = var.bucket_name
+  key    = "custom_message.zip"
 }
 resource "aws_lambda_function" "custom_message" {
-  filename         = "${var.custom_message_path}/${var.custom_message_file_name}.zip"
-  function_name    = "${var.custom_message_file_name}_${var.stage}"
+  s3_bucket        = var.bucket_name
+  s3_key           = "custom_message.zip"
+  function_name    = "custom_message"
   role             = aws_iam_role.custom_message.arn
-  handler          = "${var.custom_message_file_name}.handler"
-  source_code_hash = filebase64sha256("${var.custom_message_path}/${var.custom_message_file_name}.zip")
+  handler          = "custom_message.handler"
+  source_code_hash = data.aws_s3_bucket_object.custom_message.body
   runtime          = "nodejs12.x"
   timeout          = 10
   layers           = [ var.node_layer_arn ]
@@ -278,17 +281,11 @@ resource "aws_lambda_function" "custom_message" {
   environment {
     variables = {
       TABLE_NAME = var.table_name
-      ENV = var.stage
-      RESOURCENAME = "blogAuthCustomMessage"
-      REGION = "us-west-2"
     }
   }
   tags = {
     Name = var.developer
   }
-  depends_on = [
-    data.archive_file.custom_message, 
-  ]
 }
 resource "aws_lambda_permission" "custom_message" {
   statement_id  = "AllowExecutionFromCognito"
@@ -342,35 +339,33 @@ resource "aws_iam_role_policy" "post_confirmation" {
   policy = data.aws_iam_policy_document.post_confirmation.json
   role   = aws_iam_role.post_confirmation.id
 }
-data "archive_file" "post_confirmation" {
-  type = "zip"
-  source_file = "${var.post_confirmation_path}/${var.post_confirmation_file_name}.js"
-  output_path = "${var.post_confirmation_path}/${var.post_confirmation_file_name}.zip"
+/**
+ * Get the object from S3 to see if it needs to be applied.
+ */
+data "aws_s3_bucket_object" "post_confirmation" {
+  bucket = var.bucket_name
+  key    = "custom_message.zip"
 }
 resource "aws_lambda_function" "post_confirmation" {
-  filename         = "${var.post_confirmation_path}/${var.post_confirmation_file_name}.zip"
-  function_name    = "${var.post_confirmation_file_name}_${var.stage}"
+  s3_bucket        = var.bucket_name
+  s3_key           = "post_confirmation.zip"
+  function_name    = "post_confirmation"
   role             = aws_iam_role.post_confirmation.arn
-  handler          = "${var.post_confirmation_file_name}.handler"
-  source_code_hash = filebase64sha256("${var.post_confirmation_path}/${var.post_confirmation_file_name}.zip")
+  handler          = "post_confirmation.handler"
+  source_code_hash = data.aws_s3_bucket_object.post_confirmation.body
   runtime          = "nodejs12.x"
   timeout          = 10
   layers           = [ var.node_layer_arn ]
   description      = "An Amazon Cognito Pool trigger that adds a user to a User Pool and DynamoDB"
   environment {
     variables = {
-      ENV = var.stage
       TABLE_NAME = var.table_name,
       GROUP = "User"
-      REGION = "us-west-2"
     }
   }
   tags = {
     Name = var.developer
   }
-  depends_on = [
-    data.archive_file.post_confirmation, 
-  ]
 }
 resource "aws_lambda_permission" "post_confirmation" {
   statement_id  = "AllowExecutionFromCognito"
