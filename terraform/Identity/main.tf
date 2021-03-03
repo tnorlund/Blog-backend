@@ -48,12 +48,17 @@ resource "aws_cognito_user_pool" "main" {
   }
 }
 
- resource "aws_cognito_user_pool_client" "client" {
+resource "aws_cognito_user_pool_domain" "main" {
+  domain       = "tylernorlund"
+  user_pool_id = aws_cognito_user_pool.main.id
+}
+
+resource "aws_cognito_user_pool_client" "client" {
     name                = "client"
     user_pool_id        = aws_cognito_user_pool.main.id
     generate_secret     = false
     explicit_auth_flows = ["ADMIN_NO_SRP_AUTH"]
- }
+}
 
 resource "aws_cognito_identity_pool" "main" {
   identity_pool_name               = "${var.identity_pool_name}_${var.stage}"

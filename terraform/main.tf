@@ -151,14 +151,14 @@ output "GATSBY_ANALYTICS_FIREHOSE" {
   value = module.analytics.firehose_stream_name
 }
 
-# output "GATSBY_AWS_REGION" {
-#   value = var.aws_region
-# }
+output "GATSBY_AWS_REGION" {
+  value = var.aws_region
+}
 
-# output "GATSBY_ANALYTICS_REGION" {
-#   value = var.aws_region
-# }
+output "GATSBY_ANALYTICS_REGION" {
+  value = var.aws_region
+}
 
-# output "GATSBY_API_BLOG_NAME" {
-#   value = var.api_name
-# }
+output "GATSBY_API_BLOG_NAME" {
+  value = var.api_name
+}
