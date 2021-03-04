@@ -11,3 +11,9 @@ variable "root_domain_name" {
   description = "The domain with nothing before it."
   default = "tylernorlund.com"
 }
+
+variable "dev_domain_name" {
+  type = string
+  description = "The domain with dev before it"
+  default = "dev.tylernorlund.com"
+}

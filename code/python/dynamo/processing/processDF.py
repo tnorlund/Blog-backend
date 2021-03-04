@@ -38,11 +38,9 @@ def processDF( key, s3_client ):
     index_col = 'time'
   )
   df = df.drop_duplicates().sort_index()
-  print( df )
   index_change = df.ne(
     df.shift()
   ).apply( lambda x: x.index[x].tolist() ).title
-  print( index_change )
   indexes = [
     ( index_change[index], index_change[index + 1] - 1 )
       if index != len( index_change ) - 1
