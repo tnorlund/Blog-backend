@@ -593,7 +593,24 @@ module "delete_vote" {
   node_layer_arn            = var.node_layer_arn
 }
 
-resource "aws_api_gateway_deployment" "deployment" {
+resource "aws_api_gateway_domain_name" "main" {
+  certificate_arn = var.aws_acm_certificate_validation_certificate_arn
+  domain_name     = "api.tylernorlund.com"
+}
+
+resource "aws_api_gateway_stage" "main" {
+  deployment_id = aws_api_gateway_deployment.main.id
+  rest_api_id   = var.api_gateway_id
+  stage_name    = var.stage
+}
+
+resource "aws_api_gateway_base_path_mapping" "main" {
+  api_id      = var.api_gateway_id
+  domain_name = aws_api_gateway_domain_name.main.domain_name
+  stage_name  = aws_api_gateway_stage.main.stage_name
+}
+
+resource "aws_api_gateway_deployment" "main" {
   rest_api_id = var.api_gateway_id
   stage_name  = var.stage
   triggers = {

@@ -53,3 +53,8 @@ variable "dynamo_arn"{
   type = string
   description = "The ARN of the DynamoDB table"
 }
+
+variable "aws_acm_certificate_validation_certificate_arn" {
+  type = string
+  description = "The ACM certificate validation for the API Route 53 record"
+}

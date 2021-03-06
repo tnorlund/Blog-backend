@@ -117,6 +117,7 @@ module "api" {
   dynamo_arn                   = module.analytics.dynamo_arn
   node_layer_arn               = module.node_layer.arn
   user_pool_arn                = module.identity.user_pool_arn
+  aws_acm_certificate_validation_certificate_arn = module.content_delivery.aws_acm_certificate_validation_certificate_arn
 }
 
 /**
