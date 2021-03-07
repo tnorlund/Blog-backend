@@ -5,7 +5,7 @@ resource "aws_api_gateway_authorizer" "authorizer" {
   name          = "CognitoUserPoolAuthorizer"
   type          = "COGNITO_USER_POOLS"
   rest_api_id   = var.api_gateway_id
-  provider_arns = [ var.user_pool_arn ]
+  provider_arns = [var.user_pool_arn]
 }
 
 /**
@@ -43,12 +43,12 @@ data "aws_iam_policy_document" "lambda_policy_doc" {
       "dynamodb:Scan",
       "dynamodb:Query",
       "dynamodb:UpdateItem",
-      "dynamodb:GetRecords", 
+      "dynamodb:GetRecords",
       "logs:CreateLogGroup",
       "logs:PutLogEvents",
       "logs:CreateLogStream"
     ]
-    resources = [ 
+    resources = [
       var.dynamo_arn,
       "${var.dynamo_arn}/*",
       "arn:aws:logs:*:*:*"
@@ -96,7 +96,7 @@ data "aws_iam_policy_document" "lambda_policy_doc_cognito" {
       "dynamodb:Scan",
       "dynamodb:Query",
       "dynamodb:UpdateItem",
-      "dynamodb:GetRecords", 
+      "dynamodb:GetRecords",
       "cognito-idp:AdminUpdateUserAttributes",
       "cognito-idp:adminUserGlobalSignOut",
       "cognito-idp:adminDisableUser",
@@ -104,7 +104,7 @@ data "aws_iam_policy_document" "lambda_policy_doc_cognito" {
       "logs:PutLogEvents",
       "logs:CreateLogStream"
     ]
-    resources = [ 
+    resources = [
       var.dynamo_arn,
       "${var.dynamo_arn}/*",
       "arn:aws:logs:*:*:*",
@@ -123,7 +123,7 @@ resource "aws_iam_role_policy" "lambda_policy_cognito" {
  *
  *****************************************************************************/
 resource "aws_api_gateway_resource" "blog" {
-  path_part = "blog"
+  path_part   = "blog"
   parent_id   = var.api_gateway_root_resource_id
   rest_api_id = var.api_gateway_id
 }
@@ -210,7 +210,7 @@ module "get_user" {
  *
  *****************************************************************************/
 resource "aws_api_gateway_resource" "user_details" {
-  path_part = "user-details"
+  path_part   = "user-details"
   parent_id   = var.api_gateway_root_resource_id
   rest_api_id = var.api_gateway_id
 }
@@ -243,7 +243,7 @@ module "get_user_details" {
  *
  *****************************************************************************/
 resource "aws_api_gateway_resource" "user_name" {
-  path_part = "user-name"
+  path_part   = "user-name"
   parent_id   = var.api_gateway_root_resource_id
   rest_api_id = var.api_gateway_id
 }
@@ -273,7 +273,7 @@ module "post_user_name" {
  *
  *****************************************************************************/
 resource "aws_api_gateway_resource" "disable_user" {
-  path_part = "disable-user"
+  path_part   = "disable-user"
   parent_id   = var.api_gateway_root_resource_id
   rest_api_id = var.api_gateway_id
 }
@@ -303,7 +303,7 @@ module "post_disable_user" {
  *
  *****************************************************************************/
 resource "aws_api_gateway_resource" "tos" {
-  path_part = "tos"
+  path_part   = "tos"
   parent_id   = var.api_gateway_root_resource_id
   rest_api_id = var.api_gateway_id
 }
@@ -615,24 +615,24 @@ resource "aws_api_gateway_deployment" "main" {
   stage_name  = var.stage
   triggers = {
     redeployment = sha1(
-      join( 
-        ",", 
+      join(
+        ",",
         list(
-          jsonencode( module.get_blog.integration ),
-          jsonencode( module.post_blog.integration ),
-          jsonencode( module.get_user.integration ), 
-          jsonencode( module.get_user_details.integration ), 
-          jsonencode( module.post_user_name.integration ), 
-          jsonencode( module.post_disable_user.integration ), 
-          jsonencode( module.get_project.integration ), 
-          jsonencode( module.post_project.integration ), 
-          jsonencode( module.post_post.integration ), 
-          jsonencode( module.get_post.integration ), 
-          jsonencode( module.delete_post.integration ), 
-          jsonencode( module.get_post_details.integration ), 
-          jsonencode( module.post_comment.integration ), 
-          jsonencode( module.delete_comment.integration ), 
-          jsonencode( module.post_reply.integration ), 
+          jsonencode(module.get_blog.integration),
+          jsonencode(module.post_blog.integration),
+          jsonencode(module.get_user.integration),
+          jsonencode(module.get_user_details.integration),
+          jsonencode(module.post_user_name.integration),
+          jsonencode(module.post_disable_user.integration),
+          jsonencode(module.get_project.integration),
+          jsonencode(module.post_project.integration),
+          jsonencode(module.post_post.integration),
+          jsonencode(module.get_post.integration),
+          jsonencode(module.delete_post.integration),
+          jsonencode(module.get_post_details.integration),
+          jsonencode(module.post_comment.integration),
+          jsonencode(module.delete_comment.integration),
+          jsonencode(module.post_reply.integration),
         )
       )
     )

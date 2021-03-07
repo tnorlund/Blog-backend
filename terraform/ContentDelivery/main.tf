@@ -31,9 +31,9 @@ POLICY
  * email address.
  */
 resource "aws_acm_certificate" "certificate" {
-  domain_name       = "*.${var.root_domain_name}"
-  validation_method = "EMAIL"
-  subject_alternative_names = [ var.root_domain_name ]
+  domain_name               = "*.${var.root_domain_name}"
+  validation_method         = "EMAIL"
+  subject_alternative_names = [var.root_domain_name]
 }
 
 /**
@@ -89,7 +89,7 @@ resource "aws_cloudfront_distribution" "www_distribution" {
    * This sets the aliases of the Cloudfront distribution. Here, it is being
    * set to be accessible by <var.www_domain_name>.
    */
-  aliases = [ var.www_domain_name ]
+  aliases = [var.www_domain_name]
 
   restrictions {
     geo_restriction {
@@ -166,8 +166,8 @@ EOF
 resource "aws_cloudfront_realtime_log_config" "analytics" {
   name          = "analytics"
   sampling_rate = 100
-  fields        = [
-    "timestamp", 
+  fields = [
+    "timestamp",
     "c-ip",
     "time-to-first-byte",
     "sc-status",
@@ -245,7 +245,7 @@ resource "aws_kinesis_stream" "analytics" {
  */
 data "aws_iam_policy_document" "kinesis_firehose" {
   statement {
-    effect="Allow"
+    effect = "Allow"
     actions = [
       "kinesis:*",
       "firehose:*",
@@ -262,8 +262,8 @@ data "aws_iam_policy_document" "kinesis_firehose" {
   }
 }
 resource "aws_iam_role" "kinesis_firehose" {
-   name = "cloudfront_kinesis_role"
-   assume_role_policy = <<EOF
+  name               = "cloudfront_kinesis_role"
+  assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -298,14 +298,14 @@ resource "aws_kinesis_firehose_delivery_stream" "extended_s3_stream" {
 
   kinesis_source_configuration {
     kinesis_stream_arn = aws_kinesis_stream.analytics.arn
-    role_arn = aws_iam_role.kinesis_firehose.arn
+    role_arn           = aws_iam_role.kinesis_firehose.arn
   }
 
   extended_s3_configuration {
-     cloudwatch_logging_options {
-      log_group_name = "/aws/lambda/tylernorlund_cloudfront_analytics"
+    cloudwatch_logging_options {
+      log_group_name  = "/aws/lambda/tylernorlund_cloudfront_analytics"
       log_stream_name = "tylernorlund_cloudfront_analytics"
-      enabled = true
+      enabled         = true
     }
     role_arn   = aws_iam_role.firehose_role.arn
     bucket_arn = aws_s3_bucket.bucket.arn
@@ -339,7 +339,7 @@ EOF
 }
 data "aws_iam_policy_document" "kinesis_firehose_s3" {
   statement {
-    effect="Allow"
+    effect = "Allow"
     actions = [
       "s3:AbortMultipartUpload",
       "s3:GetBucketLocation",
@@ -529,14 +529,14 @@ resource "aws_cloudfront_distribution" "dev_distribution" {
   default_root_object = "index.html"
 
   default_cache_behavior {
-    viewer_protocol_policy = "redirect-to-https"
-    compress               = true
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = var.dev_domain_name
-    min_ttl                = 0
-    default_ttl            = 86400
-    max_ttl                = 31536000
+    viewer_protocol_policy  = "redirect-to-https"
+    compress                = true
+    allowed_methods         = ["GET", "HEAD"]
+    cached_methods          = ["GET", "HEAD"]
+    target_origin_id        = var.dev_domain_name
+    min_ttl                 = 0
+    default_ttl             = 86400
+    max_ttl                 = 31536000
     realtime_log_config_arn = aws_cloudfront_realtime_log_config.analytics.arn
 
     forwarded_values {
