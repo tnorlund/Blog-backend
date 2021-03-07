@@ -120,7 +120,7 @@ resource "aws_iam_role" "analytics" {
     {
       "Action": "sts:AssumeRole",
       "Principal": {
-        "Service": "kinesis.amazonaws.com"
+        "Service": "cloudfront.amazonaws.com"
       },
       "Effect": "Allow"
     }
@@ -142,9 +142,15 @@ resource "aws_iam_role_policy" "analytics" {
           "kinesis:DescribeStreamSummary",
           "kinesis:DescribeStream",
           "kinesis:PutRecord",
-          "kinesis:PutRecords"
+          "kinesis:PutRecords",
+          "logs:CreateLogGroup",
+          "logs:PutLogEvents",
+          "logs:CreateLogStream"
         ],
-        "Resource": "${aws_kinesis_stream.analytics.arn}"
+        "Resource": [
+          "${aws_kinesis_stream.analytics.arn}",
+          "arn:aws:logs:*:*:*"
+        ]
     }
   ]
 }
@@ -219,8 +225,8 @@ resource "aws_cloudfront_realtime_log_config" "analytics" {
  * This is the Kinesis data stream used by the main Cloudfront realtime logging.
  */
 resource "aws_kinesis_stream" "analytics" {
-  name             = "blog-analytics"
-  shard_count      = 1
+  name             = "blog-cloudfront-analytics"
+  shard_count      = 4
   retention_period = 48
 
   shard_level_metrics = [
@@ -241,32 +247,16 @@ data "aws_iam_policy_document" "kinesis_firehose" {
   statement {
     effect="Allow"
     actions = [
-      "s3:AbortMultipartUpload",
-      "s3:GetBucketLocation",
-      "s3:GetObject",
-      "s3:ListBucket",
-      "s3:ListBucketMultipartUploads",
-      "s3:PutObject",
-
       "kinesis:*",
-      # "kinesis:DescribeStreamSummary",
-      # "kinesis:DescribeStream",
-      # "kinesis:PutRecord",
-      # "kinesis:PutRecords",
-
-      # "firehose:DeleteDeliveryStream",
-      # "firehose:PutRecord",
-      # "firehose:PutRecordBatch",
-      # "firehose:UpdateDestination",
-
-
-      # "lambda:InvokeFunction",
-      # "lambda:GetFunctionConfiguration"
+      "firehose:*",
+      "logs:CreateLogGroup",
+      "logs:PutLogEvents",
+      "logs:CreateLogStream"
     ]
     resources = [
-      aws_s3_bucket.bucket.arn,
-      "${aws_s3_bucket.bucket.arn}/*",
-      aws_kinesis_stream.analytics.arn
+      aws_kinesis_stream.analytics.arn,
+      aws_kinesis_firehose_delivery_stream.extended_s3_stream.arn,
+      "arn:aws:logs:*:*:*"
     ]
     sid = "kinesisId"
   }
@@ -280,7 +270,7 @@ resource "aws_iam_role" "kinesis_firehose" {
     {
       "Action": "sts:AssumeRole",
       "Principal": {
-        "Service": "kinesis.amazonaws.com"
+        "Service": "firehose.amazonaws.com"
       },
       "Effect": "Allow"
     }
@@ -293,24 +283,34 @@ resource "aws_iam_role_policy" "kinesis_firehose_stream" {
   role   = aws_iam_role.kinesis_firehose.id
 }
 
+resource "aws_cloudwatch_log_group" "s3_analytics" {
+  name = "/aws/lambda/tylernorlund_cloudfront_analytics"
+}
+
+resource "aws_cloudwatch_log_stream" "fs3_analyticsoo" {
+  name           = "tylernorlund_cloudfront_analytics"
+  log_group_name = aws_cloudwatch_log_group.s3_analytics.name
+}
+
 resource "aws_kinesis_firehose_delivery_stream" "extended_s3_stream" {
   name        = "tylernorlund-cloudfront-analytics"
   destination = "extended_s3"
 
-  # kinesis_source_configuration {
-  #   kinesis_stream_arn = aws_kinesis_stream.analytics.arn
-  #   role_arn = aws_iam_role.kinesis_firehose.arn
-  # }
+  kinesis_source_configuration {
+    kinesis_stream_arn = aws_kinesis_stream.analytics.arn
+    role_arn = aws_iam_role.kinesis_firehose.arn
+  }
 
   extended_s3_configuration {
      cloudwatch_logging_options {
       log_group_name = "/aws/lambda/tylernorlund_cloudfront_analytics"
-      log_stream_name = "example_stream"
+      log_stream_name = "tylernorlund_cloudfront_analytics"
       enabled = true
     }
     role_arn   = aws_iam_role.firehose_role.arn
     bucket_arn = aws_s3_bucket.bucket.arn
   }
+  # depends_on = [aws_iam_role_policy.kinesis_firehose_stream]
 }
 
 resource "aws_s3_bucket" "bucket" {
@@ -347,17 +347,21 @@ data "aws_iam_policy_document" "kinesis_firehose_s3" {
       "s3:ListBucket",
       "s3:ListBucketMultipartUploads",
       "s3:PutObject",
+      "logs:CreateLogGroup",
+      "logs:PutLogEvents",
+      "logs:CreateLogStream"
     ]
     resources = [
       aws_s3_bucket.bucket.arn,
       "${aws_s3_bucket.bucket.arn}/*",
+      "arn:aws:logs:*:*:*"
     ]
     sid = "kinesisId"
   }
 }
 resource "aws_iam_role_policy" "kinesis_firehose_stream_s3" {
   policy = data.aws_iam_policy_document.kinesis_firehose_s3.json
-  role   = aws_iam_role.kinesis_firehose.id
+  role   = aws_iam_role.firehose_role.id
 }
 
 /**
@@ -438,6 +442,7 @@ resource "aws_cloudfront_distribution" "root_distribution" {
     min_ttl                = 0
     default_ttl            = 86400
     max_ttl                = 31536000
+    realtime_log_config_arn = aws_cloudfront_realtime_log_config.analytics.arn
 
     forwarded_values {
       query_string = false
@@ -533,6 +538,7 @@ resource "aws_cloudfront_distribution" "dev_distribution" {
     min_ttl                = 0
     default_ttl            = 86400
     max_ttl                = 31536000
+    realtime_log_config_arn = aws_cloudfront_realtime_log_config.analytics.arn
 
     forwarded_values {
       query_string = false
