@@ -10,7 +10,7 @@ resource "aws_api_gateway_rest_api" "main" {
 # Cognito
 resource "aws_cognito_user_pool" "main" {
   name                     = "${var.user_pool_name}_${var.stage}"
-  username_attributes      = [ "email" ]
+  username_attributes      = ["email"]
   auto_verified_attributes = ["email"]
   mfa_configuration        = "OFF"
   schema {
@@ -39,12 +39,12 @@ resource "aws_cognito_user_pool" "main" {
     post_confirmation = aws_lambda_function.post_confirmation.arn
   }
   lifecycle {
-    ignore_changes = [ schema ]
+    ignore_changes = [schema]
   }
   email_configuration {
-    source_arn = aws_ses_email_identity.identity.arn
+    source_arn             = aws_ses_email_identity.identity.arn
     reply_to_email_address = "no-reply@${var.domain}"
-    email_sending_account = "DEVELOPER"
+    email_sending_account  = "DEVELOPER"
   }
 }
 
@@ -54,10 +54,10 @@ resource "aws_cognito_user_pool_domain" "main" {
 }
 
 resource "aws_cognito_user_pool_client" "client" {
-    name                = "client"
-    user_pool_id        = aws_cognito_user_pool.main.id
-    generate_secret     = false
-    explicit_auth_flows = ["ADMIN_NO_SRP_AUTH"]
+  name                = "client"
+  user_pool_id        = aws_cognito_user_pool.main.id
+  generate_secret     = false
+  explicit_auth_flows = ["ADMIN_NO_SRP_AUTH"]
 }
 
 resource "aws_cognito_identity_pool" "main" {
@@ -69,7 +69,7 @@ resource "aws_cognito_identity_pool" "main" {
     provider_name           = aws_cognito_user_pool.main.endpoint
     server_side_token_check = true
   }
- }
+}
 
 resource "aws_cognito_identity_pool_roles_attachment" "main" {
   identity_pool_id = aws_cognito_identity_pool.main.id
@@ -98,7 +98,7 @@ resource "aws_cognito_user_group" "Admin" {
 
 data "aws_iam_policy_document" "user_policy" {
   statement {
-    effect="Allow"
+    effect = "Allow"
     actions = [
       "firehose:ListDeliveryStreams",
       "firehose:PutRecord",
@@ -117,9 +117,9 @@ data "aws_iam_policy_document" "user_policy" {
   }
 }
 resource "aws_iam_role" "user" {
-   name = "user_role"
+  name = "user_role"
 
-   assume_role_policy = <<EOF
+  assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -141,7 +141,7 @@ resource "aws_iam_role_policy" "user" {
 
 data "aws_iam_policy_document" "auth_policy" {
   statement {
-    effect="Allow"
+    effect = "Allow"
     actions = [
       "firehose:ListDeliveryStreams",
       "firehose:PutRecord",
@@ -160,9 +160,9 @@ data "aws_iam_policy_document" "auth_policy" {
   }
 }
 resource "aws_iam_role" "auth" {
-   name = "auth_role"
+  name = "auth_role"
 
-   assume_role_policy = <<EOF
+  assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -184,7 +184,7 @@ resource "aws_iam_role_policy" "auth" {
 
 data "aws_iam_policy_document" "unauth_policy" {
   statement {
-    effect="Allow"
+    effect = "Allow"
     actions = [
       "firehose:ListDeliveryStreams",
       "firehose:PutRecord",
@@ -203,9 +203,9 @@ data "aws_iam_policy_document" "unauth_policy" {
   }
 }
 resource "aws_iam_role" "unauth" {
-   name = "unauth_role"
+  name = "unauth_role"
 
-   assume_role_policy = <<EOF
+  assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -228,7 +228,7 @@ resource "aws_iam_role_policy" "unauth" {
 
 data "aws_iam_policy_document" "custom_message" {
   statement {
-    effect="Allow"
+    effect = "Allow"
     actions = [
       "dynamodb:PutItem",
       "dynamodb:UpdateItem",
@@ -244,8 +244,8 @@ data "aws_iam_policy_document" "custom_message" {
   }
 }
 resource "aws_iam_role" "custom_message" {
-   name = "custommessage"
-   assume_role_policy = <<EOF
+  name               = "custommessage"
+  assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -280,7 +280,7 @@ resource "aws_lambda_function" "custom_message" {
   source_code_hash = data.aws_s3_bucket_object.custom_message.body
   runtime          = "nodejs12.x"
   timeout          = 10
-  layers           = [ var.node_layer_arn ]
+  layers           = [var.node_layer_arn]
   description      = "An Amazon Cognito Pool trigger that composes a unique message after a user signs up"
 
   environment {
@@ -302,7 +302,7 @@ resource "aws_lambda_permission" "custom_message" {
 
 data "aws_iam_policy_document" "post_confirmation" {
   statement {
-    effect="Allow"
+    effect = "Allow"
     actions = [
       "dynamodb:GetItem",
       "dynamodb:PutItem",
@@ -323,8 +323,8 @@ data "aws_iam_policy_document" "post_confirmation" {
   }
 }
 resource "aws_iam_role" "post_confirmation" {
-   name = "post_confirmation_${var.stage}"
-   assume_role_policy = <<EOF
+  name               = "post_confirmation_${var.stage}"
+  assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -360,12 +360,12 @@ resource "aws_lambda_function" "post_confirmation" {
   source_code_hash = data.aws_s3_bucket_object.post_confirmation.body
   runtime          = "nodejs12.x"
   timeout          = 10
-  layers           = [ var.node_layer_arn ]
+  layers           = [var.node_layer_arn]
   description      = "An Amazon Cognito Pool trigger that adds a user to a User Pool and DynamoDB"
   environment {
     variables = {
       TABLE_NAME = var.table_name,
-      GROUP = "User"
+      GROUP      = "User"
     }
   }
   tags = {

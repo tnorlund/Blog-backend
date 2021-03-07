@@ -84,19 +84,19 @@ data "aws_iam_policy_document" "lambda_policy_doc" {
       "dynamodb:Scan",
       "dynamodb:Query",
       "dynamodb:UpdateItem",
-      "dynamodb:GetRecords", 
-      "dynamodb:GetShardIterator", 
-      "dynamodb:DescribeStream", 
+      "dynamodb:GetRecords",
+      "dynamodb:GetShardIterator",
+      "dynamodb:DescribeStream",
       "dynamodb:ListShards",
       "dynamodb:ListStreams",
       "logs:CreateLogGroup",
       "logs:PutLogEvents",
       "logs:CreateLogStream"
     ]
-    resources = [ 
+    resources = [
       aws_dynamodb_table.table.arn,
       aws_dynamodb_table.table.stream_arn,
-      "arn:aws:logs:*" 
+      "arn:aws:logs:*"
     ]
     sid = "codecommitid"
   }
@@ -133,17 +133,17 @@ data "aws_s3_bucket_object" "dynamo_db_stream" {
 }
 resource "aws_lambda_function" "dynamo_db_stream" {
   # filename          = "${var.dynamo_path}/${var.dynamo_file_name}.zip"
-  s3_bucket         = var.bucket_name
-  s3_key            = "dynamo_processor.zip"
-  function_name     = "dynamodb-lambda-stream"
-  role              = aws_iam_role.lambda_role.arn
-  handler           = "dynamo_processor.handler"
-  source_code_hash  = data.aws_s3_bucket_object.dynamo_db_stream.body
-  runtime           = "nodejs12.x"
-  layers            = [ var.node_layer_arn ]
+  s3_bucket        = var.bucket_name
+  s3_key           = "dynamo_processor.zip"
+  function_name    = "dynamodb-lambda-stream"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "dynamo_processor.handler"
+  source_code_hash = data.aws_s3_bucket_object.dynamo_db_stream.body
+  runtime          = "nodejs12.x"
+  layers           = [var.node_layer_arn]
   environment {
     variables = {
-      IPIFY_KEY = var.ipify_key
+      IPIFY_KEY  = var.ipify_key
       TABLE_NAME = var.table_name
     }
   }
@@ -158,9 +158,9 @@ resource "aws_lambda_event_source_mapping" "dynamo_mapping" {
   enabled           = true
   function_name     = aws_lambda_function.dynamo_db_stream.arn
   starting_position = "TRIM_HORIZON"
-  depends_on        = [ 
-    aws_lambda_function.dynamo_db_stream, 
-    aws_dynamodb_table.table 
+  depends_on = [
+    aws_lambda_function.dynamo_db_stream,
+    aws_dynamodb_table.table
   ]
 }
 
@@ -191,18 +191,18 @@ data "aws_iam_policy_document" "s3" {
       "logs:PutLogEvents",
       "logs:CreateLogStream"
     ]
-    resources = [ 
+    resources = [
       aws_dynamodb_table.table.arn,
       "arn:aws:s3:::*/*",
-      "arn:aws:logs:*" 
+      "arn:aws:logs:*"
     ]
     sid = "lambdaS3Processor"
   }
 }
 resource "aws_iam_role" "s3" {
-   name = "s3_process_role"
+  name = "s3_process_role"
 
-   assume_role_policy = <<EOF
+  assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -231,23 +231,23 @@ data "aws_s3_bucket_object" "s3" {
 }
 resource "aws_lambda_function" "s3" {
   # filename          = "${var.s3_path}/${var.s3_file_name}.zip"
-  s3_bucket         = var.bucket_name
-  s3_key            = "s3_processor.zip"
-  function_name     = "s3-lambda-processor"
-  role              = aws_iam_role.s3.arn
-  handler           = "s3_processor.s3_processor"
-  source_code_hash  = data.aws_s3_bucket_object.s3.body
-  runtime           = "python3.8"
-  layers            = [ var.python_layer_arn ]
-  memory_size       = 256
-  timeout           = 60
+  s3_bucket        = var.bucket_name
+  s3_key           = "s3_processor.zip"
+  function_name    = "s3-lambda-processor"
+  role             = aws_iam_role.s3.arn
+  handler          = "s3_processor.s3_processor"
+  source_code_hash = data.aws_s3_bucket_object.s3.body
+  runtime          = "python3.8"
+  layers           = [var.python_layer_arn]
+  memory_size      = 256
+  timeout          = 60
   environment {
     variables = {
-      IPIFY_KEY = var.ipify_key
+      IPIFY_KEY  = var.ipify_key
       TABLE_NAME = var.table_name
     }
   }
-  tags              = {
+  tags = {
     Project   = "Blog"
     Developer = var.developer
   }
@@ -259,13 +259,13 @@ resource "aws_lambda_permission" "s3" {
   source_arn    = aws_s3_bucket.bucket.arn
 }
 resource "aws_s3_bucket_notification" "bucket_terraform_notification" {
-   bucket = aws_s3_bucket.bucket.id
-   lambda_function {
-       lambda_function_arn = aws_lambda_function.s3.arn
-       events = ["s3:ObjectCreated:Put"]
-   }
+  bucket = aws_s3_bucket.bucket.id
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.s3.arn
+    events              = ["s3:ObjectCreated:Put"]
+  }
 
-   depends_on = [ aws_lambda_permission.s3 ]
+  depends_on = [aws_lambda_permission.s3]
 }
 
 # Create a Lambda function to process the kinesis stream
@@ -282,18 +282,18 @@ data "aws_iam_policy_document" "kinesis" {
       "logs:PutLogEvents",
       "logs:CreateLogStream"
     ]
-    resources = [ 
+    resources = [
       aws_dynamodb_table.table.arn,
-      "arn:aws:logs:*" 
+      "arn:aws:logs:*"
     ]
     sid = "lambdaKinesisProcessor"
   }
 }
 
 resource "aws_iam_role" "kinesis" {
-   name = "kinesis_process_role"
+  name = "kinesis_process_role"
 
-   assume_role_policy = <<EOF
+  assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -321,23 +321,23 @@ data "aws_s3_bucket_object" "kinesis_processor" {
 }
 resource "aws_lambda_function" "kinesis_processor" {
   # filename          = "${var.kinesis_path}/${var.kinesis_file_name}.zip"
-  s3_bucket         = var.bucket_name
-  s3_key            = "kinesis_processor.zip"
-  function_name     = "firehose-lambda-processor"
-  role              = aws_iam_role.kinesis.arn
-  handler           = "kinesis_processor.handler"
-  source_code_hash  = data.aws_s3_bucket_object.kinesis_processor.body
-  runtime           = "nodejs12.x"
-  layers            = [ var.node_layer_arn ]
-  memory_size       = 256
-  timeout           = 60
+  s3_bucket        = var.bucket_name
+  s3_key           = "kinesis_processor.zip"
+  function_name    = "firehose-lambda-processor"
+  role             = aws_iam_role.kinesis.arn
+  handler          = "kinesis_processor.handler"
+  source_code_hash = data.aws_s3_bucket_object.kinesis_processor.body
+  runtime          = "nodejs12.x"
+  layers           = [var.node_layer_arn]
+  memory_size      = 256
+  timeout          = 60
   environment {
     variables = {
-      IPIFY_KEY = var.ipify_key
+      IPIFY_KEY  = var.ipify_key
       TABLE_NAME = var.table_name
     }
   }
-  tags              = {
+  tags = {
     Project   = "Blog"
     Developer = var.developer
   }
@@ -352,7 +352,7 @@ resource "aws_lambda_permission" "blog" {
 # Create the Firehose stream
 data "aws_iam_policy_document" "kinesis_policy" {
   statement {
-    effect="Allow"
+    effect = "Allow"
     actions = [
       "s3:AbortMultipartUpload",
       "s3:GetBucketLocation",
@@ -372,8 +372,8 @@ data "aws_iam_policy_document" "kinesis_policy" {
   }
 }
 resource "aws_iam_role" "kinesis_role" {
-   name = "kinesis_role"
-   assume_role_policy = <<EOF
+  name               = "kinesis_role"
+  assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -395,17 +395,17 @@ resource "aws_iam_role_policy" "kinesis_stream" {
 resource "aws_kinesis_firehose_delivery_stream" "extended_s3_stream" {
   name        = "tylernorlund_blog_analytics"
   destination = "extended_s3"
-  
+
 
   extended_s3_configuration {
     cloudwatch_logging_options {
-      log_group_name = "/aws/lambda/tylernorlund_blog_analytics"
+      log_group_name  = "/aws/lambda/tylernorlund_blog_analytics"
       log_stream_name = "example_stream"
-      enabled = true
+      enabled         = true
     }
-    role_arn   = aws_iam_role.kinesis_role.arn
-    bucket_arn = aws_s3_bucket.bucket.arn
-    buffer_size = 1
+    role_arn        = aws_iam_role.kinesis_role.arn
+    bucket_arn      = aws_s3_bucket.bucket.arn
+    buffer_size     = 1
     buffer_interval = 60
 
     processing_configuration {
@@ -420,7 +420,7 @@ resource "aws_kinesis_firehose_delivery_stream" "extended_s3_stream" {
     }
   }
   lifecycle {
-    ignore_changes = [ extended_s3_configuration ]
+    ignore_changes = [extended_s3_configuration]
   }
 }
 resource "aws_cloudwatch_log_group" "stream" {

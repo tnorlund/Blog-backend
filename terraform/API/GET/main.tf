@@ -25,14 +25,14 @@ data "aws_s3_bucket_object" "object" {
 }
 resource "aws_lambda_function" "lambda_function" {
   s3_bucket        = var.bucket_name
-  s3_key           = "${var.function_name}.zip"  
+  s3_key           = "${var.function_name}.zip"
   function_name    = var.function_name
   role             = var.iam_role_arn
   handler          = "${var.function_name}.handler"
   source_code_hash = data.aws_s3_bucket_object.object.body
   runtime          = "nodejs12.x"
   timeout          = 10
-  layers           = [ var.node_layer_arn ]
+  layers           = [var.node_layer_arn]
   description      = var.description
   environment {
     variables = {

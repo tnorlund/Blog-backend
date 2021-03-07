@@ -105,18 +105,19 @@ module "identity" {
  * changes, it redeploys the stage.
  */
 module "api" {
-  source                       = "./API"
-  developer                    = "Tyler Norlund"
-  bucket_name                  = "tf-cloud"
-  stage                        = var.stage
-  api_gateway_id               = module.identity.api_gateway_id
-  api_gateway_execution_arn    = module.identity.api_gateway_execution_arn
-  api_gateway_arn              = module.identity.api_gateway_arn
-  api_gateway_root_resource_id = module.identity.api_gateway_root_resource_id
-  table_name                   = module.analytics.dynamo_table_name
-  dynamo_arn                   = module.analytics.dynamo_arn
-  node_layer_arn               = module.node_layer.arn
-  user_pool_arn                = module.identity.user_pool_arn
+  source                                         = "./API"
+  developer                                      = "Tyler Norlund"
+  bucket_name                                    = "tf-cloud"
+  stage                                          = var.stage
+  api_gateway_id                                 = module.identity.api_gateway_id
+  api_gateway_execution_arn                      = module.identity.api_gateway_execution_arn
+  api_gateway_arn                                = module.identity.api_gateway_arn
+  api_gateway_root_resource_id                   = module.identity.api_gateway_root_resource_id
+  table_name                                     = module.analytics.dynamo_table_name
+  dynamo_arn                                     = module.analytics.dynamo_arn
+  node_layer_arn                                 = module.node_layer.arn
+  user_pool_arn                                  = module.identity.user_pool_arn
+  aws_acm_certificate_validation_certificate_arn = module.content_delivery.aws_acm_certificate_validation_certificate_arn
 }
 
 /**
