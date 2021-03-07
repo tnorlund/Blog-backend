@@ -442,7 +442,6 @@ resource "aws_cloudfront_distribution" "root_distribution" {
     min_ttl                = 0
     default_ttl            = 86400
     max_ttl                = 31536000
-    realtime_log_config_arn = aws_cloudfront_realtime_log_config.analytics.arn
 
     forwarded_values {
       query_string = false
