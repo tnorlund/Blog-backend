@@ -141,7 +141,6 @@ jobs:
         id: output
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
-          cat ./terraform/output.json
           content=`cat ./terraform/output.json`
           # the following lines are only required for multi line json
           content="${content//'%'/'%25'}"
@@ -149,6 +148,7 @@ jobs:
           content="${content//$'\r'/'%0D'}"
           # end of optional handling for multi line json
           echo "::set-output name=terraform::$content"
+
       - name: Gatsby Cloud Sync
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
