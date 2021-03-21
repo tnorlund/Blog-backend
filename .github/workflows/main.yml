@@ -133,13 +133,15 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           cd terraform
-          terraform output --json > output.json
           terraform apply -auto-approve
+          terraform output --json > output.json
+          cat output.json
 
       - name: Set Terraform Output
         id: output
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
+          cat ./terraform/output.json
           content=`cat ./terraform/output.json`
           # the following lines are only required for multi line json
           content="${content//'%'/'%25'}"
