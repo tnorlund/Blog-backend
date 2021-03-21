@@ -226,8 +226,8 @@ resource "aws_cloudfront_realtime_log_config" "analytics" {
  */
 resource "aws_kinesis_stream" "analytics" {
   name             = "blog-cloudfront-analytics"
-  shard_count      = 4
-  retention_period = 48
+  shard_count      = 1
+  retention_period = 24
 
   shard_level_metrics = [
     "IncomingBytes",
@@ -310,7 +310,6 @@ resource "aws_kinesis_firehose_delivery_stream" "extended_s3_stream" {
     role_arn   = aws_iam_role.firehose_role.arn
     bucket_arn = aws_s3_bucket.bucket.arn
   }
-  # depends_on = [aws_iam_role_policy.kinesis_firehose_stream]
 }
 
 resource "aws_s3_bucket" "bucket" {
