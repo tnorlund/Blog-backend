@@ -135,10 +135,9 @@ jobs:
           cd terraform
           terraform apply -auto-approve
           terraform output --json > output.json
-          cat output.json
 
-      - name: Set Terraform Output
-        id: output
+      - name: tf_output
+        id: tf_output
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           content=`cat ./terraform/output.json`
@@ -147,10 +146,11 @@ jobs:
           content="${content//$'\n'/'%0A'}"
           content="${content//$'\r'/'%0D'}"
           # end of optional handling for multi line json
+          echo $content
           echo "::set-output name=terraform::$content"
 
       - name: Gatsby Cloud Sync
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
-          echo "${{fromJson(steps.output.outputs.terraform)}}"
+          echo "${{fromJson(steps.tf_output.outputs.terraform)}}"
 
