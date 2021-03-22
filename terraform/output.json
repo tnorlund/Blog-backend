@@ -1,0 +1,47 @@
+{
+  "GATSBY_ANALYTICS_FIREHOSE": {
+    "sensitive": false,
+    "type": "string",
+    "value": "tylernorlund_blog_analytics"
+  },
+  "GATSBY_ANALYTICS_REGION": {
+    "sensitive": false,
+    "type": "string",
+    "value": "us-east-1"
+  },
+  "GATSBY_API_BLOG_ENDPOINT": {
+    "sensitive": false,
+    "type": "string",
+    "value": "https://x8dkp13jl9.execute-api.us-east-1.amazonaws.com/prod"
+  },
+  "GATSBY_API_BLOG_NAME": {
+    "sensitive": false,
+    "type": "string",
+    "value": "blog_api"
+  },
+  "GATSBY_AWS_REGION": {
+    "sensitive": false,
+    "type": "string",
+    "value": "us-east-1"
+  },
+  "GATSBY_COGNITO_IDENTITY_POOL_ID": {
+    "sensitive": false,
+    "type": "string",
+    "value": "us-east-1:fa907fa3-da34-463b-a74d-63e3f86abd8f"
+  },
+  "GATSBY_DYNAMO_TABLE": {
+    "sensitive": false,
+    "type": "string",
+    "value": "Blog"
+  },
+  "GATSBY_USER_POOLS_CLIENT_ID": {
+    "sensitive": false,
+    "type": "string",
+    "value": "4vjih9j1sitd1q36k42p7qotk7"
+  },
+  "GATSBY_USER_POOLS_ID": {
+    "sensitive": false,
+    "type": "string",
+    "value": "us-east-1_oGxYaUFrD"
+  }
+}
