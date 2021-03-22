@@ -137,7 +137,7 @@ jobs:
           terraform output --json > output.json
 
       - name: Gatsby Cloud Sync
-        uses: tnorlund/gatsby-cloud-action@v1.1.0
+        uses: tnorlund/gatsby-cloud-action@v1.1.2
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         with:
           gatsby-token: ${{ secrets.GATSBY_TOKEN }}
