@@ -431,3 +431,10 @@ resource "aws_cloudwatch_log_group" "processor" {
   name              = "/aws/lambda/firehose-lambda-processor"
   retention_in_days = 14
 }
+
+# Sererless EMR function for parsing Health ".xml"
+resource "aws_emrserverless_application" "health_parser" {
+  name          = "health_parser"
+  release_label = "emr-6.6.0"
+  type          = "hive"
+}

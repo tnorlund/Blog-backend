@@ -14,7 +14,7 @@ exports.handler = async ( event, context ) => {
   ) return {
     statusCode: 500, 
     headers: { 'Access-Control-Allow-Origin' : '*' }, 
-    body: `Must give the slug and the title in the body.`,
+    body: `Must give a body in the API call.`,
     isBase64Encoded: false
   } 
   try {
